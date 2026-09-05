@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.9",
     "@tailwindcss/vite": "^4.3.3",
+    "@tigrisdata/storage": "^3.21.0",
     "axios": "^1.20.0",
     "lucide-react": "^1.41.0",
     "react": "^19.2.8",
