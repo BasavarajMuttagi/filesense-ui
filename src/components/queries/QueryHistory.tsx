@@ -38,8 +38,7 @@ export const QueryHistory: React.FC<QueryHistoryProps> = ({
     <SwissModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Query History & Logs"
-      code="RAG // LOGS"
+      title="Query History"
       maxWidth="lg"
       footer={
         <SwissButton variant="outline" size="sm" onClick={onClose}>

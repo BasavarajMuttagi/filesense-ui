@@ -52,8 +52,7 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
     <SwissModal
       isOpen={Boolean(document)}
       onClose={onClose}
-      title="Document Inspector"
-      code="DOC // META"
+      title="Document Details"
       maxWidth="lg"
       footer={
         <div className="w-full flex items-center justify-between">

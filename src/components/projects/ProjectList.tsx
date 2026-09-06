@@ -185,8 +185,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
       <SwissModal
         isOpen={Boolean(projectToDelete)}
         onClose={() => setProjectToDelete(null)}
-        title="Confirm Cascade Purge"
-        code="PURGE // CASCADE"
+        title="Delete Project"
         footer={
           <>
             <SwissButton

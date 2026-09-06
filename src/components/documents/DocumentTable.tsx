@@ -10,9 +10,8 @@ import {
   RefreshCw,
   Trash2,
   Eye,
-  UploadCloud,
-  ChevronDown,
-  ChevronUp,
+  Plus,
+  X,
 } from "lucide-react";
 
 interface DocumentTableProps {
@@ -31,7 +30,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   onDeleteDocument,
 }) => {
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
-  const [showUploader, setShowUploader] = useState(true);
+  const [showUploader, setShowUploader] = useState(documents.length === 0);
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 B";
@@ -55,22 +54,11 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
 
   if (!project) {
     return (
-      <div className="flex flex-col h-full bg-white border border-slate-900 swiss-shadow">
-        <div className="p-3.5 border-b border-slate-900 bg-slate-50 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-bold bg-[#0F172A] text-white px-1.5 py-0.5">
-              02
-            </span>
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-900">
-              DOCUMENTS // PIPELINE
-            </h2>
-          </div>
-        </div>
+      <div className="flex flex-col h-full bg-white border border-slate-200">
         <div className="flex-1 flex items-center justify-center p-6">
           <EmptyState
-            title="No Active Project Selected"
-            description="Select a project repository on the left or create a new one to manage documents and ingest data."
-            code="NO_PROJECT_SELECTED"
+            title="No Project Selected"
+            description="Select a project from the dashboard to manage documents."
           />
         </div>
       </div>
@@ -80,48 +68,43 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   const totalChunks = documents.reduce((acc, d) => acc + (d.chunkCount || 0), 0);
 
   return (
-    <div className="flex flex-col h-full bg-white border border-slate-900 swiss-shadow">
+    <div className="flex flex-col h-full bg-white border border-slate-200">
       {/* Panel Header */}
-      <div className="p-3.5 border-b border-slate-900 bg-slate-50 flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono font-bold bg-[#0F172A] text-white px-1.5 py-0.5">
-            02
+      <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between flex-wrap gap-2">
+        <div className="flex flex-col gap-0.5">
+          <h2 className="text-sm font-bold text-slate-900 font-sans">
+            Documents
+          </h2>
+          <span className="text-xs text-slate-400 font-sans">
+            {documents.length} {documents.length === 1 ? "file" : "files"} · {totalChunks} chunks indexed
           </span>
-          <div className="flex items-baseline gap-2">
-            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-900">
-              {project.title}
-            </h2>
-            <span className="text-[10px] font-mono text-slate-500">
-              ({documents.length} FILES // {totalChunks} CHUNKS)
-            </span>
-          </div>
         </div>
 
         <div className="flex items-center gap-2">
           <SwissButton
-            variant="outline"
+            variant={showUploader ? "outline" : "vermilion"}
             size="sm"
             onClick={() => setShowUploader(!showUploader)}
-            icon={showUploader ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            icon={showUploader ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
           >
-            {showUploader ? "HIDE UPLOADER" : "UPLOAD FILES"}
+            {showUploader ? "Close Upload" : "Upload File"}
           </SwissButton>
 
           <SwissButton
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={onRefresh}
             loading={loading}
-            icon={<RefreshCw className="w-3 h-3" />}
-            title="Refresh documents list"
+            icon={<RefreshCw className="w-3.5 h-3.5" />}
+            title="Refresh documents"
           >
-            REFRESH
+            Refresh
           </SwissButton>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto flex flex-col">
-        {/* Tigris Direct S3 Upload Zone */}
+        {/* Upload Zone */}
         {showUploader && (
           <div className="p-4 border-b border-slate-200 bg-slate-50/50">
             <DocumentDropzone
@@ -136,23 +119,33 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
           {documents.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                title="No Documents Uploaded"
-                description="Upload PDFs, text, or documentation into this repository. Files are uploaded directly to Tigris storage and indexed into Upstash Vector."
-                code="DOCS_EMPTY"
-                icon={<UploadCloud className="w-5 h-5 text-slate-500" />}
+                title="No documents yet"
+                description="Upload PDFs or text files to index their content for semantic search."
+                action={
+                  !showUploader ? (
+                    <SwissButton
+                      variant="vermilion"
+                      size="sm"
+                      icon={<Plus className="w-3.5 h-3.5" />}
+                      onClick={() => setShowUploader(true)}
+                    >
+                      Upload First File
+                    </SwissButton>
+                  ) : undefined
+                }
               />
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-mono border-collapse">
+              <table className="w-full text-left text-xs font-sans border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-[10px] text-slate-500 uppercase tracking-wider">
-                    <th className="py-2.5 px-3">File Name</th>
-                    <th className="py-2.5 px-3">Status</th>
-                    <th className="py-2.5 px-3 text-right">Chunks</th>
-                    <th className="py-2.5 px-3 text-right">Size</th>
-                    <th className="py-2.5 px-3">Date</th>
-                    <th className="py-2.5 px-3 text-right">Actions</th>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-[11px] text-slate-500 uppercase tracking-wider">
+                    <th className="py-2.5 px-4 font-semibold">File Name</th>
+                    <th className="py-2.5 px-3 font-semibold">Status</th>
+                    <th className="py-2.5 px-3 text-right font-semibold">Chunks</th>
+                    <th className="py-2.5 px-3 text-right font-semibold">Size</th>
+                    <th className="py-2.5 px-3 font-semibold">Date</th>
+                    <th className="py-2.5 px-4 text-right font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -162,10 +155,10 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                       className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                       onClick={() => setSelectedDoc(doc)}
                     >
-                      <td className="py-2.5 px-3">
-                        <div className="flex items-center gap-2 max-w-[240px]">
-                          <FileText className="w-3.5 h-3.5 text-slate-400 shrink-0 group-hover:text-[#E11D48] transition-colors" />
-                          <span className="font-bold text-slate-900 truncate" title={doc.fileName}>
+                      <td className="py-2.5 px-4">
+                        <div className="flex items-center gap-2 max-w-[280px]">
+                          <FileText className="w-4 h-4 text-slate-400 shrink-0 group-hover:text-slate-900 transition-colors" />
+                          <span className="font-medium text-slate-900 truncate" title={doc.fileName}>
                             {doc.fileName}
                           </span>
                         </div>
@@ -180,7 +173,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                               ? "processing"
                               : doc.status === "error"
                               ? "error"
-                              : "created"
+                              : "default"
                           }
                           pulse={doc.status === "processing"}
                         >
@@ -188,38 +181,36 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                         </SwissBadge>
                       </td>
 
-                      <td className="py-2.5 px-3 text-right text-slate-700">
+                      <td className="py-2.5 px-3 text-right font-mono text-slate-600">
                         {doc.chunkCount ?? 0}
                       </td>
 
-                      <td className="py-2.5 px-3 text-right text-slate-500">
+                      <td className="py-2.5 px-3 text-right font-mono text-slate-500">
                         {formatBytes(doc.fileSize)}
                       </td>
 
-                      <td className="py-2.5 px-3 text-slate-500 text-[11px]">
+                      <td className="py-2.5 px-3 text-slate-500 font-sans">
                         {formatDate(doc.createdAt)}
                       </td>
 
-                      <td className="py-2.5 px-3 text-right">
+                      <td className="py-2.5 px-4 text-right">
                         <div
-                          className="flex items-center justify-end gap-1.5"
+                          className="flex items-center justify-end gap-1"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
                             type="button"
                             onClick={() => setSelectedDoc(doc)}
-                            className="p-1 text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer"
-                            title="Inspect metadata"
-                            aria-label={`Inspect ${doc.fileName}`}
+                            className="p-1 text-slate-400 hover:text-slate-900 transition-colors cursor-pointer rounded-xs"
+                            title="Inspect details"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => onDeleteDocument(doc.id)}
-                            className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                            title="Delete document"
-                            aria-label={`Delete ${doc.fileName}`}
+                            className="p-1 text-slate-400 hover:text-red-600 transition-colors cursor-pointer rounded-xs"
+                            title="Delete file"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

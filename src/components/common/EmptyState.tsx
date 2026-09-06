@@ -15,7 +15,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   icon,
   action,
-  code = "NULL",
   className = "",
 }) => {
   return (
@@ -25,13 +24,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <div className="w-10 h-10 border border-slate-300 bg-white flex items-center justify-center text-slate-700 mb-3.5">
         {icon || <FolderPlus className="w-5 h-5 text-slate-500" />}
       </div>
-      <div className="text-[10px] font-mono uppercase text-[#E11D48] tracking-widest font-bold mb-1">
-        SYS // {code}
-      </div>
-      <h4 className="text-sm font-bold uppercase tracking-wide text-slate-900 mb-1">
+      <h4 className="text-sm font-bold tracking-tight text-slate-900 mb-1">
         {title}
       </h4>
-      <p className="text-xs text-slate-500 max-w-sm font-mono mb-4 leading-relaxed">
+      <p className="text-xs text-slate-500 max-w-sm mb-4 leading-relaxed font-sans">
         {description}
       </p>
       {action && <div>{action}</div>}

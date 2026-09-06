@@ -7,13 +7,8 @@ import { listQueries } from "./api/queries";
 import type { Project, DocumentItem, QueryRecord } from "./types";
 
 import { SwissHeader } from "./components/layout/SwissHeader";
-import { DevSettingsModal } from "./components/layout/DevSettingsModal";
-import { ProjectList } from "./components/projects/ProjectList";
-import { CreateProjectModal } from "./components/projects/CreateProjectModal";
-import { DocumentTable } from "./components/documents/DocumentTable";
-import { QueryTerminal } from "./components/queries/QueryTerminal";
-import { QueryHistory } from "./components/queries/QueryHistory";
-import { Folder, FileText, Sparkles } from "lucide-react";
+import { PerplexityChat } from "./components/chat/PerplexityChat";
+import { NewProjectModal } from "./components/chat/NewProjectModal";
 
 export function App() {
   const { getToken, isLoaded } = useAuth();
@@ -24,19 +19,8 @@ export function App() {
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [queries, setQueries] = useState<QueryRecord[]>([]);
 
-  // Loading States
-  const [loadingProjects, setLoadingProjects] = useState(false);
-  const [loadingDocuments, setLoadingDocuments] = useState(false);
-  const [loadingQueries, setLoadingQueries] = useState(false);
-
-  // Modals & Drawers
-  const [createProjectOpen, setCreateProjectOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [refreshCounter, setRefreshCounter] = useState(0);
-
-  // Mobile Active Tab: 'projects' | 'documents' | 'query'
-  const [mobileTab, setMobileTab] = useState<"projects" | "documents" | "query">("documents");
+  // Modals
+  const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
 
   // Register token getter for apiClient and Tigris client uploads
   useEffect(() => {
@@ -53,15 +37,16 @@ export function App() {
 
   // Load documents for selected project
   const fetchDocuments = useCallback(async (projectId: string) => {
-    setLoadingDocuments(true);
     try {
       const docs = await getDocumentsByProject(projectId);
       setDocuments(docs);
+      // update documentCount locally on active project
+      setProjects((prev) =>
+        prev.map((p) => (p.id === projectId ? { ...p, documentCount: docs.length } : p))
+      );
     } catch (err) {
       console.error("Failed to load documents:", err);
       setDocuments([]);
-    } finally {
-      setLoadingDocuments(false);
     }
   }, []);
 
@@ -71,7 +56,6 @@ export function App() {
     let active = true;
 
     const loadInitial = async () => {
-      setLoadingProjects(true);
       try {
         const data = await getProjects();
         if (active) {
@@ -80,8 +64,6 @@ export function App() {
         }
       } catch (err) {
         console.error("Failed to load projects:", err);
-      } finally {
-        if (active) setLoadingProjects(false);
       }
     };
 
@@ -89,7 +71,7 @@ export function App() {
     return () => {
       active = false;
     };
-  }, [isLoaded, refreshCounter]);
+  }, [isLoaded]);
 
   // When selected project changes, load its documents and queries
   useEffect(() => {
@@ -102,9 +84,6 @@ export function App() {
         }
         return;
       }
-
-      setLoadingDocuments(true);
-      setLoadingQueries(true);
       try {
         const [docs, qs] = await Promise.all([
           getDocumentsByProject(selectedProjectId),
@@ -116,11 +95,6 @@ export function App() {
         }
       } catch (err) {
         console.error("Failed to load project details:", err);
-      } finally {
-        if (active) {
-          setLoadingDocuments(false);
-          setLoadingQueries(false);
-        }
       }
     };
 
@@ -149,7 +123,6 @@ export function App() {
   const handleProjectCreated = (newProject: Project) => {
     setProjects((prev) => [newProject, ...prev]);
     setSelectedProjectId(newProject.id);
-    setMobileTab("documents");
   };
 
   const handleDeleteProject = async (projectId: string) => {
@@ -164,7 +137,6 @@ export function App() {
   const handleDeleteDocument = async (docId: string) => {
     await deleteDocument(docId);
     setDocuments((prev) => prev.filter((d) => d.id !== docId));
-    // update project doc count locally
     setProjects((prev) =>
       prev.map((p) =>
         p.id === selectedProjectId
@@ -174,128 +146,37 @@ export function App() {
     );
   };
 
-  const handleQueryCompleted = (newRecord: QueryRecord) => {
-    setQueries((prev) => [newRecord, ...prev]);
-  };
-
   const activeProject = projects.find((p) => p.id === selectedProjectId) || null;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-slate-900 font-sans">
-      {/* Swiss Header */}
+      {/* Sleek Minimalist Header */}
       <SwissHeader
-        activeProjectTitle={activeProject?.title}
-        onOpenSettings={() => setSettingsOpen(true)}
-        refreshTrigger={refreshCounter}
+        projects={projects}
+        activeProject={activeProject}
+        documents={documents}
+        onSelectProject={(id) => setSelectedProjectId(id)}
+        onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
+        onDeleteProject={handleDeleteProject}
+        onDeleteDocument={handleDeleteDocument}
       />
 
-      {/* Mobile Workspace Tab Bar */}
-      <div className="lg:hidden border-b border-slate-900 bg-white grid grid-cols-3 text-center text-xs font-mono font-bold select-none">
-        <button
-          type="button"
-          onClick={() => setMobileTab("projects")}
-          className={`py-2.5 flex items-center justify-center gap-1.5 border-r border-slate-200 cursor-pointer ${
-            mobileTab === "projects" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-100"
-          }`}
-        >
-          <Folder className="w-3.5 h-3.5" /> REPOSITORIES
-        </button>
-        <button
-          type="button"
-          onClick={() => setMobileTab("documents")}
-          className={`py-2.5 flex items-center justify-center gap-1.5 border-r border-slate-200 cursor-pointer ${
-            mobileTab === "documents" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-100"
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5" /> DOCUMENTS
-        </button>
-        <button
-          type="button"
-          onClick={() => setMobileTab("query")}
-          className={`py-2.5 flex items-center justify-center gap-1.5 cursor-pointer ${
-            mobileTab === "query" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-100"
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5 text-[#E11D48]" /> RAG TERMINAL
-        </button>
-      </div>
-
-      {/* Main Precision Grid Workspace */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 min-h-[calc(100vh-3.5rem)]">
-        {/* Left Column: Projects Repository List (Col 3) */}
-        <div
-          className={`lg:col-span-3 h-[750px] lg:h-[calc(100vh-6.5rem)] ${
-            mobileTab === "projects" ? "block" : "hidden lg:block"
-          }`}
-        >
-          <ProjectList
-            projects={projects}
-            selectedProjectId={selectedProjectId}
-            onSelectProject={(id) => {
-              setSelectedProjectId(id);
-              setMobileTab("documents");
-            }}
-            onOpenCreateModal={() => setCreateProjectOpen(true)}
-            onDeleteProject={handleDeleteProject}
-            loading={loadingProjects}
-          />
-        </div>
-
-        {/* Middle Column: Documents Management & Ingestion (Col 5) */}
-        <div
-          className={`lg:col-span-5 h-[750px] lg:h-[calc(100vh-6.5rem)] ${
-            mobileTab === "documents" ? "block" : "hidden lg:block"
-          }`}
-        >
-          <DocumentTable
-            project={activeProject}
-            documents={documents}
-            loading={loadingDocuments}
-            onRefresh={() => selectedProjectId && fetchDocuments(selectedProjectId)}
-            onDeleteDocument={handleDeleteDocument}
-          />
-        </div>
-
-        {/* Right Column: RAG Intelligence Terminal (Col 4) */}
-        <div
-          className={`lg:col-span-4 h-[750px] lg:h-[calc(100vh-6.5rem)] ${
-            mobileTab === "query" ? "block" : "hidden lg:block"
-          }`}
-        >
-          <QueryTerminal
-            activeProjectId={selectedProjectId}
-            activeProjectTitle={activeProject?.title}
-            history={queries}
-            onOpenHistory={() => setHistoryOpen(true)}
-            onQueryCompleted={handleQueryCompleted}
-          />
-        </div>
+      {/* Main Perplexity-Style Document Intelligence Chat */}
+      <main className="flex-1 flex flex-col">
+        <PerplexityChat
+          activeProject={activeProject}
+          documentCount={documents.length}
+          onDocumentUploaded={() => selectedProjectId && fetchDocuments(selectedProjectId)}
+          onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
+          initialHistory={queries}
+        />
       </main>
 
-      {/* Modals */}
-      <CreateProjectModal
-        isOpen={createProjectOpen}
-        onClose={() => setCreateProjectOpen(false)}
+      {/* Create Case / Project Modal */}
+      <NewProjectModal
+        isOpen={newProjectModalOpen}
+        onClose={() => setNewProjectModalOpen(false)}
         onProjectCreated={handleProjectCreated}
-      />
-
-      <DevSettingsModal
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        onSettingsChanged={() => {
-          setRefreshCounter((prev) => prev + 1);
-        }}
-      />
-
-      <QueryHistory
-        isOpen={historyOpen}
-        onClose={() => setHistoryOpen(false)}
-        queries={queries}
-        onSelectQuery={(q) => {
-          // Put the selected query in view
-          handleQueryCompleted(q);
-        }}
-        loading={loadingQueries}
       />
     </div>
   );

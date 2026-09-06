@@ -5,7 +5,6 @@ interface SwissModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  code?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
   maxWidth?: "sm" | "md" | "lg" | "xl";
@@ -15,7 +14,6 @@ export const SwissModal: React.FC<SwissModalProps> = ({
   isOpen,
   onClose,
   title,
-  code = "SYS",
   children,
   footer,
   maxWidth = "md",
@@ -55,14 +53,9 @@ export const SwissModal: React.FC<SwissModalProps> = ({
       >
         {/* Modal Header */}
         <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-          <div className="flex items-center gap-2.5">
-            <span className="text-[10px] font-mono font-bold bg-[#E11D48] text-white px-1.5 py-0.5 uppercase tracking-wider">
-              {code}
-            </span>
-            <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">
-              {title}
-            </h3>
-          </div>
+          <h3 className="text-sm font-bold tracking-tight text-slate-900">
+            {title}
+          </h3>
           <button
             onClick={onClose}
             className="p-1 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer"

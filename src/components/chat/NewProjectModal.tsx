@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import { SwissModal } from "../common/SwissModal";
-import { SwissInput, SwissTextarea } from "../common/SwissInput";
 import { SwissButton } from "../common/SwissButton";
 import { createProject } from "../../api/projects";
 import type { Project } from "../../types";
 
-interface CreateProjectModalProps {
+interface NewProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onProjectCreated: (project: Project) => void;
 }
 
-export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
+export const NewProjectModal: React.FC<NewProjectModalProps> = ({
   isOpen,
   onClose,
   onProjectCreated,
@@ -24,7 +23,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      setError("Project title is required");
+      setError("Please enter a case or project name");
       return;
     }
 
@@ -51,7 +50,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     <SwissModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Create New Project"
+      title="New Case or Project"
+      maxWidth="sm"
       footer={
         <>
           <SwissButton variant="outline" size="sm" onClick={onClose} disabled={loading}>
@@ -63,28 +63,39 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             onClick={handleSubmit}
             loading={loading}
           >
-            Create Project
+            Create
           </SwissButton>
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 font-sans">
-        <SwissInput
-          label="Project Title"
-          placeholder="e.g. Q3 Financial Review"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          error={error || undefined}
-          autoFocus
-        />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 font-sans">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-slate-700">
+            Case / Project Name
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. Smith v. Jones, Metro Bridge Bid"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            autoFocus
+            className="w-full px-3 py-2 text-sm bg-white border border-slate-300 focus:border-slate-900 rounded-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
+          />
+          {error && <span className="text-xs text-red-600">{error}</span>}
+        </div>
 
-        <SwissTextarea
-          label="Description (optional)"
-          placeholder="Brief description of this project's purpose..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-        />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-slate-700">
+            Description (Optional)
+          </label>
+          <textarea
+            placeholder="Brief scope, client name, or key dates..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+            className="w-full px-3 py-2 text-sm bg-white border border-slate-300 focus:border-slate-900 rounded-xs text-slate-900 placeholder:text-slate-400 focus:outline-none resize-none"
+          />
+        </div>
       </form>
     </SwissModal>
   );
