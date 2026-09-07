@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import type { DocumentItem, Project } from "../../types";
-import { DocumentDropzone } from "./DocumentDropzone";
 import {
   FileText,
   Download,
   Trash2,
-  Plus,
   X,
   Code,
   FileCode,
@@ -25,7 +23,7 @@ interface ArtifactsPanelProps {
   onClose: () => void;
   onDocumentUploaded: () => void;
   onDeleteDocument: (docId: string) => Promise<void>;
-  onInspectDocument: (doc: DocumentItem) => void;
+  onInspectDocument: (docItem: DocumentItem) => void;
   onOpenNewProjectModal: () => void;
 }
 
@@ -34,12 +32,10 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
   documents,
   isOpen,
   onClose,
-  onDocumentUploaded,
   onDeleteDocument,
   onInspectDocument,
   onOpenNewProjectModal,
 }) => {
-  const [showUploadZone, setShowUploadZone] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -57,36 +53,36 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
 
     if (["ts", "tsx", "js", "jsx", "py"].includes(ext)) {
       return (
-        <div className="size-8 rounded-lg bg-blue-50 text-[#0052FF] flex items-center justify-center shrink-0 border border-blue-100">
-          <Code className="size-4" />
+        <div className="size-7 rounded-md bg-blue-50 text-[#0052FF] flex items-center justify-center shrink-0 border border-blue-100">
+          <Code className="size-3.5" />
         </div>
       );
     }
     if (["prisma", "json", "sql", "yaml", "yml"].includes(ext)) {
       return (
-        <div className="size-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
-          <FileCode className="size-4" />
+        <div className="size-7 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-100">
+          <FileCode className="size-3.5" />
         </div>
       );
     }
     if (["csv", "xlsx", "xls"].includes(ext)) {
       return (
-        <div className="size-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
-          <FileSpreadsheet className="size-4" />
+        <div className="size-7 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+          <FileSpreadsheet className="size-3.5" />
         </div>
       );
     }
     if (mimeType.startsWith("image/") || ["png", "jpg", "jpeg", "svg", "webp"].includes(ext)) {
       return (
-        <div className="size-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
-          <ImageIcon className="size-4" />
+        <div className="size-7 rounded-md bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
+          <ImageIcon className="size-3.5" />
         </div>
       );
     }
     // Default document (PDF, MD, TXT, DOCX)
     return (
-      <div className="size-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200">
-        <FileText className="size-4" />
+      <div className="size-7 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200">
+        <FileText className="size-3.5" />
       </div>
     );
   };
@@ -120,120 +116,76 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
   };
 
   return (
-    <aside className="w-80 lg:w-96 h-screen bg-white border-l border-slate-200 flex flex-col shrink-0 z-30 font-sans shadow-xs select-none">
+    <aside className="w-72 lg:w-80 h-screen bg-white border-l border-slate-200 flex flex-col shrink-0 z-30 font-sans select-none">
       {/* Panel Header */}
-      <div className="p-3.5 flex items-center justify-between border-b border-slate-200 bg-white">
+      <div className="h-11 px-3.5 flex items-center justify-between border-b border-slate-200/80 bg-white">
         <div className="flex items-center gap-2">
-          <FolderOpen className="size-4 text-[#0052FF]" />
-          <h3 className="font-bold text-sm text-slate-900">
-            Corpus Artifacts
+          <FolderOpen className="size-3.5 text-slate-500" />
+          <h3 className="font-semibold text-xs text-slate-900">
+            Files
           </h3>
-          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-700 font-bold">
+          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600 font-semibold">
             {documents.length}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          {activeProject && (
-            <button
-              type="button"
-              onClick={() => setShowUploadZone(!showUploadZone)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
-                showUploadZone
-                  ? "bg-[#0052FF] text-white border-[#0052FF] shadow-xs"
-                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs"
-              }`}
-            >
-              <Plus className="size-3.5" />
-              <span>Upload</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close panel"
-            className="size-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close panel"
+          className="size-7 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
+        >
+          <X className="size-4" />
+        </button>
       </div>
 
-      {/* Upload Zone Drawer */}
-      {showUploadZone && activeProject && (
-        <div className="p-3 bg-slate-50 border-b border-slate-200">
-          <DocumentDropzone
-            projectId={activeProject.id}
-            onUploadSuccess={() => {
-              onDocumentUploaded();
-              setShowUploadZone(false);
-            }}
-          />
-        </div>
-      )}
-
-      {/* Main Artifacts List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-[#F8FAFC]">
+      {/* Main Files List */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-1.5 bg-[#F8FAFC]">
         {!activeProject ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-            <FolderOpen className="size-8 text-slate-300 mb-2" />
+            <FolderOpen className="size-7 text-slate-300 mb-2" />
             <p className="text-xs font-medium mb-3 text-slate-600">No project selected</p>
             <button
               type="button"
               onClick={onOpenNewProjectModal}
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#0052FF] text-white hover:bg-[#0045D8] transition-colors cursor-pointer shadow-xs"
+              className="px-3 py-1.5 text-xs font-semibold rounded-md bg-slate-900 text-white hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Select Project
             </button>
           </div>
         ) : documents.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
-            <FileText className="size-8 text-slate-300 mb-2" />
-            <h4 className="text-xs font-bold text-slate-900 mb-1">
-              No Documents Ingested
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-200 rounded-xl bg-white">
+            <FileText className="size-7 text-slate-300 mb-2" />
+            <h4 className="text-xs font-semibold text-slate-900 mb-1">
+              No files in this project
             </h4>
-            <p className="text-xs text-slate-500 max-w-xs mb-4">
-              Upload technical documents, PDFs, or code to index embeddings into vector search.
+            <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
+              Drop documents into chat or click Attach to index files.
             </p>
-            <button
-              type="button"
-              onClick={() => setShowUploadZone(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#0052FF] text-white hover:bg-[#0045D8] transition-colors cursor-pointer shadow-xs"
-            >
-              <Plus className="size-3.5" />
-              <span>Upload Document</span>
-            </button>
           </div>
         ) : (
           documents.map((doc) => (
             <div
               key={doc.id}
               onClick={() => onInspectDocument(doc)}
-              className="group flex items-center justify-between p-3 rounded-xl border border-slate-200/90 hover:border-blue-300 bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-2xs gap-3"
+              className="group flex items-center justify-between p-2.5 rounded-lg border border-slate-200/80 hover:border-slate-300 bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-2xs gap-2.5"
             >
               {/* Left: Icon & Details */}
-              <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
                 {getFileIcon(doc.fileName, doc.mimeType)}
 
                 <div className="flex flex-col min-w-0">
                   <span
-                    className="text-xs font-semibold text-slate-900 truncate max-w-[145px]"
+                    className="text-xs font-medium text-slate-900 truncate max-w-[130px]"
                     title={doc.fileName}
                   >
                     {doc.fileName}
                   </span>
 
                   <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-slate-400 font-mono">
-                    <span className="font-semibold text-slate-600">{getFileTypeLabel(doc.fileName)}</span>
+                    <span className="text-slate-500">{getFileTypeLabel(doc.fileName)}</span>
                     <span>·</span>
                     <span>{formatBytes(doc.fileSize)}</span>
-                    {typeof doc.chunkCount === "number" && doc.chunkCount > 0 && (
-                      <>
-                        <span>·</span>
-                        <span>{doc.chunkCount} chk</span>
-                      </>
-                    )}
                   </div>
                 </div>
               </div>
@@ -241,7 +193,7 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
               {/* Right: Actions */}
               <div className="flex items-center gap-1 shrink-0">
                 {doc.status === "processing" ? (
-                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-mono font-semibold border border-amber-200">
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-mono font-semibold border border-amber-200">
                     <Loader2 className="size-2.5 animate-spin" />
                     <span>Indexing</span>
                   </span>
@@ -254,11 +206,11 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
                   <button
                     type="button"
                     onClick={(e) => handleDownload(doc, e)}
-                    aria-label="Download document"
+                    aria-label="Download file"
                     title="Download / Open file"
-                    className="size-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-200/70 transition-colors cursor-pointer"
+                    className="size-6 flex items-center justify-center rounded text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer"
                   >
-                    <Download className="size-3.5" />
+                    <Download className="size-3" />
                   </button>
 
                   <button
@@ -267,25 +219,25 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
                       e.stopPropagation();
                       onInspectDocument(doc);
                     }}
-                    aria-label="Inspect document"
-                    title="Inspect metadata & vector chunks"
-                    className="size-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-200/70 transition-colors cursor-pointer"
+                    aria-label="Inspect file"
+                    title="Inspect metadata"
+                    className="size-6 flex items-center justify-center rounded text-slate-400 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer"
                   >
-                    <Eye className="size-3.5" />
+                    <Eye className="size-3" />
                   </button>
 
                   <button
                     type="button"
                     onClick={(e) => handleDelete(doc.id, e)}
                     disabled={deletingId === doc.id}
-                    aria-label="Delete document"
-                    title="Delete document"
-                    className="size-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer disabled:opacity-50"
+                    aria-label="Delete file"
+                    title="Delete file"
+                    className="size-6 flex items-center justify-center rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {deletingId === doc.id ? (
                       <Loader2 className="size-3 animate-spin" />
                     ) : (
-                      <Trash2 className="size-3.5" />
+                      <Trash2 className="size-3" />
                     )}
                   </button>
                 </div>
@@ -296,13 +248,13 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
       </div>
 
       {/* Footer Info */}
-      <div className="p-3 border-t border-slate-200 bg-white text-[11px] text-slate-400 flex items-center justify-between font-mono">
+      <div className="h-9 px-3 border-t border-slate-200/80 bg-white text-[10px] text-slate-400 flex items-center justify-between font-mono">
         <span className="flex items-center gap-1.5">
-          <HardDrive className="size-3.5 text-[#0052FF]" />
-          Tigris Cloud Storage
+          <HardDrive className="size-3 text-slate-400" />
+          Tigris Storage
         </span>
-        <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[10px]">
-          READY
+        <span className="text-slate-500 font-semibold">
+          Ready
         </span>
       </div>
     </aside>

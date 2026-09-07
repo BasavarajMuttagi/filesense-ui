@@ -257,7 +257,7 @@ export function App() {
         />
 
         {/* Central Chat Stream */}
-        <main className="flex-1 flex flex-col overflow-y-auto relative">
+        <main className="flex-1 flex flex-col overflow-hidden relative min-h-0">
           <PerplexityChat
             key={`${selectedProjectId || "default"}-${chatKey}`}
             activeProject={activeProject}

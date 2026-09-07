@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Square,
   ArrowUp,
+  ArrowDown,
   Loader2,
   FileSearch,
   Cpu,
@@ -63,12 +64,18 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
   const [activeCitation, setActiveCitation] = useState<{ msgId: string; index: number } | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(() => (initialHistory ? initialHistory.length >= 20 : false));
   const [loadingEarlier, setLoadingEarlier] = useState<boolean>(false);
+  const [showScrollBottom, setShowScrollBottom] = useState<boolean>(false);
+
   const abortControllerRef = useRef<AbortController | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const topSentinelRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef<boolean>(true);
+  const tokenBufferRef = useRef<string>("");
+  const rafIdRef = useRef<number | null>(null);
+
   const [prevHistory, setPrevHistory] = useState(initialHistory);
 
-  // Sync if initialHistory updates from parent during render (React recommended pattern)
+  // Sync if initialHistory updates from parent during render
   if (prevHistory !== initialHistory) {
     setPrevHistory(initialHistory);
     setMessages(
@@ -85,10 +92,53 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
     setHasMore(initialHistory ? initialHistory.length >= 20 : false);
   }
 
+  // Precision scroll controller: handles instant vs smooth positioning
+  const scrollToBottom = useCallback((behavior: "smooth" | "instant" = "instant") => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    if (behavior === "smooth") {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, []);
+
+  // Track user scroll position: if scrolled up, don't force them to bottom
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    const atBottom = distanceToBottom <= 120;
+    isAtBottomRef.current = atBottom;
+    setShowScrollBottom(!atBottom && distanceToBottom > 240);
+  };
+
+  // Scroll to bottom when switching session or when new message is added
+  useEffect(() => {
+    if (messages.length > 0 && !loading && isAtBottomRef.current) {
+      requestAnimationFrame(() => {
+        scrollToBottom("instant");
+      });
+    }
+  }, [activeSessionId, messages.length, loading, scrollToBottom]);
+
+  // Clean up RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
+
   // Lazy Load Earlier Messages
   const handleLoadEarlier = useCallback(async () => {
-    if (!activeProject || loadingEarlier || !hasMore || messages.length === 0) return;
+    if (!activeProject || loadingEarlier || !hasMore || messages.length === 0 || loading) return;
     setLoadingEarlier(true);
+    const el = scrollContainerRef.current;
+    const prevScrollHeight = el ? el.scrollHeight : 0;
+    const prevScrollTop = el ? el.scrollTop : 0;
+
     try {
       const oldestCreatedAt = messages[0].createdAt;
       const res = await listQueries(activeProject.id, {
@@ -107,6 +157,14 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
         }));
         setMessages((prev) => [...earlierMessages, ...prev]);
         setHasMore(res.hasMore);
+
+        // Preserve scroll position so it doesn't jump
+        requestAnimationFrame(() => {
+          if (el) {
+            const heightDiff = el.scrollHeight - prevScrollHeight;
+            el.scrollTop = prevScrollTop + heightDiff;
+          }
+        });
       } else {
         setHasMore(false);
       }
@@ -115,17 +173,17 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
     } finally {
       setLoadingEarlier(false);
     }
-  }, [activeProject, loadingEarlier, hasMore, messages, activeSessionId]);
+  }, [activeProject, loadingEarlier, hasMore, messages, loading, activeSessionId]);
 
-  // IntersectionObserver for top sentinel
+  // IntersectionObserver for top sentinel - disabled during active generation
   useEffect(() => {
-    if (!hasMore || loadingEarlier) return;
+    if (!hasMore || loadingEarlier || loading) return;
     const sentinel = topSentinelRef.current;
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && !loading) {
           handleLoadEarlier();
         }
       },
@@ -134,16 +192,15 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, loadingEarlier, handleLoadEarlier]);
-
-  // Auto-scroll to bottom
-  useEffect(() => {
-    if (messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, loading]);
+  }, [hasMore, loadingEarlier, loading, handleLoadEarlier]);
 
   const handleStopGeneration = () => {
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+    tokenBufferRef.current = "";
+
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -195,6 +252,14 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
 
     setMessages((prev) => [...prev, newMsg]);
     setLoading(true);
+    isAtBottomRef.current = true;
+    setShowScrollBottom(false);
+    tokenBufferRef.current = "";
+
+    // Smooth scroll down on new user message
+    requestAnimationFrame(() => {
+      scrollToBottom("smooth");
+    });
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -217,38 +282,74 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
                 : msg
             )
           );
+          if (isAtBottomRef.current) {
+            requestAnimationFrame(() => scrollToBottom("instant"));
+          }
         },
+        // Throttled token streaming via requestAnimationFrame for silky 60fps rendering
         onToken: (chunk) => {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === tempId
-                ? {
-                    ...msg,
-                    answer: (msg.answer || "") + chunk,
-                    loading: false,
-                    streaming: true,
-                  }
-                : msg
-            )
-          );
+          tokenBufferRef.current += chunk;
+
+          if (rafIdRef.current === null) {
+            rafIdRef.current = requestAnimationFrame(() => {
+              rafIdRef.current = null;
+              const pendingText = tokenBufferRef.current;
+              tokenBufferRef.current = "";
+
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === tempId
+                    ? {
+                        ...msg,
+                        answer: (msg.answer || "") + pendingText,
+                        loading: false,
+                        streaming: true,
+                      }
+                    : msg
+                )
+              );
+
+              // Auto-follow stream if user is pinned to bottom without jank
+              if (isAtBottomRef.current && scrollContainerRef.current) {
+                scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+              }
+            });
+          }
         },
         onDone: () => {
+          if (rafIdRef.current !== null) {
+            cancelAnimationFrame(rafIdRef.current);
+            rafIdRef.current = null;
+          }
+          const remainingText = tokenBufferRef.current;
+          tokenBufferRef.current = "";
+
           setLoading(false);
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === tempId
                 ? {
                     ...msg,
+                    answer: (msg.answer || "") + remainingText,
                     loading: false,
                     streaming: false,
                   }
                 : msg
             )
           );
+
+          if (isAtBottomRef.current) {
+            requestAnimationFrame(() => scrollToBottom("instant"));
+          }
         },
       });
     } catch (err: unknown) {
       if (controller.signal.aborted) return;
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+      tokenBufferRef.current = "";
       setLoading(false);
       const errMessage = err instanceof Error ? err.message : "Failed to generate answer";
       setMessages((prev) =>
@@ -347,13 +448,18 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
           </div>
         </div>
       ) : (
-        /* 2. THREAD VIEW: When conversation has started */
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Scrollable Message Area */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
-            <div className="max-w-3xl mx-auto flex flex-col gap-8 pb-4">
+        /* 2. THREAD VIEW: Smooth, high-performance scrollable conversation */
+        <div className="flex-1 flex flex-col min-h-0 relative">
+          {/* Dedicated Single Scroll Container with overflow-anchor: none to prevent browser jitter */}
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            style={{ overflowAnchor: "none" }}
+            className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 will-change-scroll"
+          >
+            <div className="max-w-3xl mx-auto flex flex-col gap-7 pb-4">
               {/* Top Sentinel & Load Earlier Messages */}
-              {hasMore && (
+              {hasMore && !loading && (
                 <div ref={topSentinelRef} className="flex justify-center py-2">
                   <button
                     type="button"
@@ -417,7 +523,7 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
                           }}
                         />
                         {msg.streaming && (
-                          <span className="inline-block w-2 h-4 bg-[#0052FF] animate-pulse ml-1 align-middle rounded-xs" />
+                          <span className="inline-block w-1.5 h-3.5 bg-[#0052FF] animate-pulse ml-1 align-middle rounded-xs" />
                         )}
                       </div>
 
@@ -445,9 +551,24 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
                   )}
                 </div>
               ))}
-              <div ref={messagesEndRef} />
             </div>
           </div>
+
+          {/* Floating "Scroll to latest" button if user scrolled up while stream is active */}
+          {showScrollBottom && (
+            <button
+              type="button"
+              onClick={() => {
+                isAtBottomRef.current = true;
+                setShowScrollBottom(false);
+                scrollToBottom("smooth");
+              }}
+              className="absolute bottom-28 right-6 sm:right-10 z-30 flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-full shadow-md border border-slate-200 hover:bg-slate-50 transition-all cursor-pointer animate-in fade-in zoom-in-95"
+            >
+              <ArrowDown className="size-3.5 text-[#0052FF]" />
+              <span>Scroll to latest</span>
+            </button>
+          )}
 
           {/* Sticky Bottom Chat Input Bar */}
           <div className="sticky bottom-0 bg-gradient-to-t from-[#F8FAFC] via-[#F8FAFC]/95 to-transparent pt-3 pb-5 px-4 z-20">
