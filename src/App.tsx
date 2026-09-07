@@ -29,6 +29,11 @@ export function App() {
   const [artifactsPanelOpen, setArtifactsPanelOpen] = useState(true);
   const [inspectingDocument, setInspectingDocument] = useState<DocumentItem | null>(null);
 
+  // Loading States for Skeletons
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+
   // Modals
   const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
   const [chatKey, setChatKey] = useState(0);
@@ -101,6 +106,10 @@ export function App() {
         }
       } catch (err) {
         console.error("Failed to load projects:", err);
+      } finally {
+        if (active) {
+          setLoadingProjects(false);
+        }
       }
     };
 
@@ -114,7 +123,13 @@ export function App() {
   useEffect(() => {
     let active = true;
     const loadProjectData = async () => {
-      if (!selectedProjectId) return;
+      if (!selectedProjectId) {
+        setLoadingDocuments(false);
+        setLoadingSessions(false);
+        return;
+      }
+      setLoadingDocuments(true);
+      setLoadingSessions(true);
       try {
         const [docs, sess] = await Promise.all([
           getDocumentsByProject(selectedProjectId),
@@ -134,6 +149,11 @@ export function App() {
         }
       } catch (err) {
         console.error("Failed to load project details:", err);
+      } finally {
+        if (active) {
+          setLoadingDocuments(false);
+          setLoadingSessions(false);
+        }
       }
     };
 
@@ -233,6 +253,8 @@ export function App() {
         sessions={sessions}
         activeSessionId={activeSessionId}
         collapsed={sidebarCollapsed}
+        loadingProjects={loadingProjects}
+        loadingSessions={loadingSessions}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         onSelectProject={(id) => setSelectedProjectId(id)}
         onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
@@ -277,6 +299,7 @@ export function App() {
         activeProject={activeProject}
         documents={documents}
         isOpen={artifactsPanelOpen}
+        loading={loadingDocuments}
         onClose={() => setArtifactsPanelOpen(false)}
         onDocumentUploaded={() => selectedProjectId && fetchDocuments(selectedProjectId)}
         onDeleteDocument={handleDeleteDocument}

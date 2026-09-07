@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import type { Project, QueryRecord, SourceItem } from "../../types";
 import { submitQueryStream, listQueries } from "../../api/queries";
 import { ChatInput } from "./ChatInput";
 import { SourceChips } from "./SourceChips";
 import { PerplexityMarkdown } from "./PerplexityMarkdown";
+import { ResponseSkeleton } from "../common/SwissSkeleton";
 import {
   Layers,
   Copy,
@@ -40,6 +41,107 @@ interface ChatMessage {
   createdAt: string | number;
 }
 
+interface ChatMessageItemProps {
+  msg: ChatMessage;
+  activeCitationIndex: number | null;
+  copiedId: string | null;
+  onCitationClick: (citationIdx: number) => void;
+  onCloseCitationModal: () => void;
+  onCopyAnswer: (text: string, id: string) => void;
+}
+
+const ChatMessageItem: React.FC<ChatMessageItemProps> = React.memo(
+  ({
+    msg,
+    activeCitationIndex,
+    copiedId,
+    onCitationClick,
+    onCloseCitationModal,
+    onCopyAnswer,
+  }) => {
+    return (
+      <div id={`msg-${msg.id}`} className="flex flex-col gap-3">
+        {/* User Question Bubble */}
+        <div className="flex justify-end w-full">
+          <div className="max-w-[85%] sm:max-w-[75%] bg-slate-900 text-white px-4 py-2.5 rounded-2xl rounded-tr-xs text-sm leading-relaxed shadow-xs font-medium selection:bg-[#0052FF]">
+            {msg.question}
+          </div>
+        </div>
+
+        {/* Grounded Citations Reel */}
+        {msg.sources && msg.sources.length > 0 && (
+          <SourceChips
+            sources={msg.sources}
+            selectedSourceIndex={activeCitationIndex}
+            onCloseModal={onCloseCitationModal}
+          />
+        )}
+
+        {/* Assistant Answer Stream */}
+        {msg.loading && !msg.answer ? (
+          <ResponseSkeleton />
+        ) : msg.error ? (
+          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5 rounded-xl">
+            <AlertCircle className="size-4 shrink-0 mt-0.5 text-rose-600" />
+            <div>
+              <div className="font-bold mb-0.5">Synthesis Alert</div>
+              <div>{msg.error}</div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2 py-1">
+            {/* Markdown Answer Rendering */}
+            <div className="relative leading-relaxed">
+              <PerplexityMarkdown
+                content={msg.answer || ""}
+                isStreaming={msg.streaming}
+                onCitationClick={onCitationClick}
+              />
+              {msg.streaming && (
+                <span className="inline-block w-1.5 h-3.5 bg-[#0052FF] animate-pulse ml-1 align-middle rounded-xs" />
+              )}
+            </div>
+
+            {/* Answer Footer Actions */}
+            {msg.answer && !msg.streaming && (
+              <div className="flex items-center justify-between pt-2.5 border-t border-slate-200/80 text-xs text-slate-400 font-mono">
+                <span className="text-[11px] text-slate-400">
+                  Grounded via FileSense Vector Engine
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onCopyAnswer(msg.answer || "", msg.id)}
+                  className="flex items-center gap-1.5 px-2 py-1 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+                >
+                  {copiedId === msg.id ? (
+                    <Check className="size-3.5 text-emerald-600" />
+                  ) : (
+                    <Copy className="size-3.5" />
+                  )}
+                  <span className="text-xs">{copiedId === msg.id ? "Copied" : "Copy"}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  },
+  (prev, next) => {
+    return (
+      prev.msg.id === next.msg.id &&
+      prev.msg.question === next.msg.question &&
+      prev.msg.answer === next.msg.answer &&
+      prev.msg.loading === next.msg.loading &&
+      prev.msg.streaming === next.msg.streaming &&
+      prev.msg.sources === next.msg.sources &&
+      prev.msg.error === next.msg.error &&
+      prev.activeCitationIndex === next.activeCitationIndex &&
+      prev.copiedId === next.copiedId
+    );
+  }
+);
+
 export const PerplexityChat: React.FC<PerplexityChatProps> = ({
   activeProject,
   activeSessionId,
@@ -68,8 +170,9 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const topSentinelRef = useRef<HTMLDivElement>(null);
-  const isAtBottomRef = useRef<boolean>(true);
+  const isFollowingStreamRef = useRef<boolean>(true);
+  const pendingScrollToMsgIdRef = useRef<string | null>(null);
+  const activeStreamingIdRef = useRef<string | null>(null);
   const tokenBufferRef = useRef<string>("");
   const rafIdRef = useRef<number | null>(null);
 
@@ -92,35 +195,72 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
     setHasMore(initialHistory ? initialHistory.length >= 20 : false);
   }
 
-  // Precision scroll controller: handles instant vs smooth positioning
-  const scrollToBottom = useCallback((behavior: "smooth" | "instant" = "instant") => {
+  // Scroll directly to bottom
+  const scrollToBottom = useCallback(() => {
     const el = scrollContainerRef.current;
     if (!el) return;
-    if (behavior === "smooth") {
-      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-    } else {
-      el.scrollTop = el.scrollHeight;
-    }
+    el.scrollTop = el.scrollHeight;
+    isFollowingStreamRef.current = true;
+    setShowScrollBottom(false);
   }, []);
 
-  // Track user scroll position: if scrolled up, don't force them to bottom
+  // Track user scroll position: disengage following if user scrolls up
   const handleScroll = () => {
     const el = scrollContainerRef.current;
     if (!el) return;
     const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    const atBottom = distanceToBottom <= 120;
-    isAtBottomRef.current = atBottom;
-    setShowScrollBottom(!atBottom && distanceToBottom > 240);
+    const atBottom = distanceToBottom <= 40;
+    if (atBottom) {
+      isFollowingStreamRef.current = true;
+      setShowScrollBottom(false);
+    } else if (distanceToBottom > 160 && loading) {
+      setShowScrollBottom(true);
+    }
   };
 
-  // Scroll to bottom when switching session or when new message is added
-  useEffect(() => {
-    if (messages.length > 0 && !loading && isAtBottomRef.current) {
-      requestAnimationFrame(() => {
-        scrollToBottom("instant");
-      });
+  // Immediate detection if user scrolls up with wheel or trackpad
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY < -2) {
+      isFollowingStreamRef.current = false;
+      if (loading) setShowScrollBottom(true);
     }
-  }, [activeSessionId, messages.length, loading, scrollToBottom]);
+  };
+
+  // Synchronous DOM scroll management: focus new question, then slowly follow SSE stream
+  useLayoutEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // 1. If a new question was submitted, smoothly focus that question at top of viewport
+    if (pendingScrollToMsgIdRef.current) {
+      const targetId = pendingScrollToMsgIdRef.current;
+      pendingScrollToMsgIdRef.current = null;
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`msg-${targetId}`);
+        if (el && container) {
+          const containerRect = container.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          const targetScrollTop = container.scrollTop + (elRect.top - containerRect.top) - 20;
+          container.scrollTo({ top: Math.max(0, targetScrollTop), behavior: "smooth" });
+        }
+      });
+      return;
+    }
+
+    // 2. If following active stream, gently advance scroll only when content exceeds visible viewport
+    if (isFollowingStreamRef.current && activeStreamingIdRef.current) {
+      const overflow = container.scrollHeight - (container.scrollTop + container.clientHeight);
+      if (overflow > 0) {
+        container.scrollTop = container.scrollHeight - container.clientHeight;
+      }
+    }
+  }, [messages]);
+
+  // Reset scroll to bottom only on project or session switch
+  useEffect(() => {
+    isFollowingStreamRef.current = true;
+    scrollToBottom();
+  }, [activeSessionId, activeProject?.id, scrollToBottom]);
 
   // Clean up RAF on unmount
   useEffect(() => {
@@ -175,31 +315,14 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
     }
   }, [activeProject, loadingEarlier, hasMore, messages, loading, activeSessionId]);
 
-  // IntersectionObserver for top sentinel - disabled during active generation
-  useEffect(() => {
-    if (!hasMore || loadingEarlier || loading) return;
-    const sentinel = topSentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          handleLoadEarlier();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, loadingEarlier, loading, handleLoadEarlier]);
-
   const handleStopGeneration = () => {
     if (rafIdRef.current !== null) {
       cancelAnimationFrame(rafIdRef.current);
       rafIdRef.current = null;
     }
     tokenBufferRef.current = "";
+    activeStreamingIdRef.current = null;
+    isFollowingStreamRef.current = false;
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -252,14 +375,11 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
 
     setMessages((prev) => [...prev, newMsg]);
     setLoading(true);
-    isAtBottomRef.current = true;
-    setShowScrollBottom(false);
     tokenBufferRef.current = "";
-
-    // Smooth scroll down on new user message
-    requestAnimationFrame(() => {
-      scrollToBottom("smooth");
-    });
+    activeStreamingIdRef.current = tempId;
+    pendingScrollToMsgIdRef.current = tempId;
+    isFollowingStreamRef.current = true;
+    setShowScrollBottom(false);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -282,9 +402,6 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
                 : msg
             )
           );
-          if (isAtBottomRef.current) {
-            requestAnimationFrame(() => scrollToBottom("instant"));
-          }
         },
         // Throttled token streaming via requestAnimationFrame for silky 60fps rendering
         onToken: (chunk) => {
@@ -308,11 +425,6 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
                     : msg
                 )
               );
-
-              // Auto-follow stream if user is pinned to bottom without jank
-              if (isAtBottomRef.current && scrollContainerRef.current) {
-                scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-              }
             });
           }
         },
@@ -323,6 +435,8 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
           }
           const remainingText = tokenBufferRef.current;
           tokenBufferRef.current = "";
+          activeStreamingIdRef.current = null;
+          isFollowingStreamRef.current = false;
 
           setLoading(false);
           setMessages((prev) =>
@@ -337,10 +451,6 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
                 : msg
             )
           );
-
-          if (isAtBottomRef.current) {
-            requestAnimationFrame(() => scrollToBottom("instant"));
-          }
         },
       });
     } catch (err: unknown) {
@@ -350,6 +460,8 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
         rafIdRef.current = null;
       }
       tokenBufferRef.current = "";
+      activeStreamingIdRef.current = null;
+      isFollowingStreamRef.current = false;
       setLoading(false);
       const errMessage = err instanceof Error ? err.message : "Failed to generate answer";
       setMessages((prev) =>
@@ -454,13 +566,14 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
           <div
             ref={scrollContainerRef}
             onScroll={handleScroll}
+            onWheel={handleWheel}
             style={{ overflowAnchor: "none" }}
-            className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 will-change-scroll"
+            className="flex-1 overflow-y-auto px-4 sm:px-8 py-6"
           >
             <div className="max-w-3xl mx-auto flex flex-col gap-7 pb-4">
-              {/* Top Sentinel & Load Earlier Messages */}
+              {/* Load Earlier Messages Button (Manual only, no auto-triggering) */}
               {hasMore && !loading && (
-                <div ref={topSentinelRef} className="flex justify-center py-2">
+                <div className="flex justify-center py-2">
                   <button
                     type="button"
                     onClick={handleLoadEarlier}
@@ -478,79 +591,23 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
               )}
 
               {messages.map((msg) => (
-                <div key={msg.id} className="flex flex-col gap-3">
-                  {/* User Question Bubble */}
-                  <div className="flex justify-end w-full">
-                    <div className="max-w-[85%] sm:max-w-[75%] bg-slate-900 text-white px-4 py-2.5 rounded-2xl rounded-tr-xs text-sm leading-relaxed shadow-xs font-medium selection:bg-[#0052FF]">
-                      {msg.question}
-                    </div>
-                  </div>
-
-                  {/* Grounded Citations Reel */}
-                  {msg.sources && msg.sources.length > 0 && (
-                    <SourceChips
-                      sources={msg.sources}
-                      selectedSourceIndex={
-                        activeCitation?.msgId === msg.id ? activeCitation.index : null
-                      }
-                      onCloseModal={() => setActiveCitation(null)}
-                    />
-                  )}
-
-                  {/* Assistant Answer Stream */}
-                  {msg.loading && !msg.answer ? (
-                    <div className="flex items-center gap-2.5 py-3 text-xs text-slate-500 font-mono">
-                      <div className="size-2 rounded-full bg-[#0052FF] animate-ping" />
-                      <span>Synthesizing verified excerpts &amp; citations...</span>
-                    </div>
-                  ) : msg.error ? (
-                    <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5 rounded-xl">
-                      <AlertCircle className="size-4 shrink-0 mt-0.5 text-rose-600" />
-                      <div>
-                        <div className="font-bold mb-0.5">Synthesis Alert</div>
-                        <div>{msg.error}</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2 py-1">
-                      {/* Markdown Answer Rendering */}
-                      <div className="relative leading-relaxed">
-                        <PerplexityMarkdown
-                          content={msg.answer || ""}
-                          isStreaming={msg.streaming}
-                          onCitationClick={(citationIdx) => {
-                            setActiveCitation({ msgId: msg.id, index: citationIdx });
-                          }}
-                        />
-                        {msg.streaming && (
-                          <span className="inline-block w-1.5 h-3.5 bg-[#0052FF] animate-pulse ml-1 align-middle rounded-xs" />
-                        )}
-                      </div>
-
-                      {/* Answer Footer Actions */}
-                      {msg.answer && !msg.streaming && (
-                        <div className="flex items-center justify-between pt-2.5 border-t border-slate-200/80 text-xs text-slate-400 font-mono">
-                          <span className="text-[11px] text-slate-400">
-                            Grounded via FileSense Vector Engine
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyAnswer(msg.answer || "", msg.id)}
-                            className="flex items-center gap-1.5 px-2 py-1 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
-                          >
-                            {copiedId === msg.id ? (
-                              <Check className="size-3.5 text-emerald-600" />
-                            ) : (
-                              <Copy className="size-3.5" />
-                            )}
-                            <span className="text-xs">{copiedId === msg.id ? "Copied" : "Copy"}</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <ChatMessageItem
+                  key={msg.id}
+                  msg={msg}
+                  activeCitationIndex={
+                    activeCitation?.msgId === msg.id ? activeCitation.index : null
+                  }
+                  copiedId={copiedId}
+                  onCitationClick={(citationIdx) => {
+                    setActiveCitation({ msgId: msg.id, index: citationIdx });
+                  }}
+                  onCloseCitationModal={() => setActiveCitation(null)}
+                  onCopyAnswer={handleCopyAnswer}
+                />
               ))}
+
+              {/* Bottom anchor for rock-solid scroll pinning */}
+              <div className="h-2 w-full shrink-0" />
             </div>
           </div>
 
@@ -558,11 +615,7 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
           {showScrollBottom && (
             <button
               type="button"
-              onClick={() => {
-                isAtBottomRef.current = true;
-                setShowScrollBottom(false);
-                scrollToBottom("smooth");
-              }}
+              onClick={scrollToBottom}
               className="absolute bottom-28 right-6 sm:right-10 z-30 flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-full shadow-md border border-slate-200 hover:bg-slate-50 transition-all cursor-pointer animate-in fade-in zoom-in-95"
             >
               <ArrowDown className="size-3.5 text-[#0052FF]" />

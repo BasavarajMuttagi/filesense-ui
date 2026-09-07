@@ -12,6 +12,7 @@ import {
   Layers,
   MessageSquare,
 } from "lucide-react";
+import { SidebarNavSkeleton } from "../common/SwissSkeleton";
 
 interface AppSidebarProps {
   projects: Project[];
@@ -19,6 +20,8 @@ interface AppSidebarProps {
   sessions: ChatSession[];
   activeSessionId: string | null;
   collapsed: boolean;
+  loadingProjects?: boolean;
+  loadingSessions?: boolean;
   onToggleCollapse: () => void;
   onSelectProject: (projectId: string) => void;
   onOpenNewProjectModal: () => void;
@@ -33,6 +36,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   sessions,
   activeSessionId,
   collapsed,
+  loadingProjects = false,
+  loadingSessions = false,
   onToggleCollapse,
   onSelectProject,
   onOpenNewProjectModal,
@@ -70,24 +75,32 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {/* Projects Icons */}
         <div className="flex-1 w-full flex flex-col items-center gap-1.5 overflow-y-auto px-1 scrollbar-none">
-          {projects.map((p) => {
-            const isActive = p.id === activeProject?.id;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => onSelectProject(p.id)}
-                title={p.title}
-                className={`size-7 flex items-center justify-center rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-[#0052FF] text-white shadow-xs"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                {p.title.charAt(0).toUpperCase()}
-              </button>
-            );
-          })}
+          {loadingProjects ? (
+            <div className="flex flex-col items-center gap-1.5 w-full">
+              <div className="size-7 rounded-md bg-slate-200 animate-shimmer" />
+              <div className="size-7 rounded-md bg-slate-200 animate-shimmer" />
+              <div className="size-7 rounded-md bg-slate-200 animate-shimmer" />
+            </div>
+          ) : (
+            projects.map((p) => {
+              const isActive = p.id === activeProject?.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onSelectProject(p.id)}
+                  title={p.title}
+                  className={`size-7 flex items-center justify-center rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-[#0052FF] text-white shadow-xs"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  }`}
+                >
+                  {p.title.charAt(0).toUpperCase()}
+                </button>
+              );
+            })
+          )}
         </div>
 
         {/* Expand Trigger */}
@@ -171,7 +184,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
           {projectsExpanded && (
             <div className="space-y-0.5">
-              {projects.length === 0 ? (
+              {loadingProjects ? (
+                <div className="py-1">
+                  <SidebarNavSkeleton count={3} />
+                </div>
+              ) : projects.length === 0 ? (
                 <div className="px-2 py-2 text-xs text-slate-400 italic">No projects yet</div>
               ) : (
                 visibleProjects.map((p) => {
@@ -265,7 +282,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
           {sessionsExpanded && (
             <div className="space-y-0.5">
-              {!activeProject ? (
+              {loadingSessions ? (
+                <div className="py-1">
+                  <SidebarNavSkeleton count={4} />
+                </div>
+              ) : !activeProject ? (
                 <p className="px-2 py-2 text-xs text-slate-400 italic">Select a project</p>
               ) : sessions.length === 0 ? (
                 <p className="px-2 py-2 text-xs text-slate-400 italic">No threads yet</p>

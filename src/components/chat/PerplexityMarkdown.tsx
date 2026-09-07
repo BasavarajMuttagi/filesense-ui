@@ -10,7 +10,7 @@ interface PerplexityMarkdownProps {
   onCitationClick?: (index: number) => void;
 }
 
-export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = ({
+export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = React.memo(({
   content,
   isStreaming,
   onCitationClick,
@@ -157,7 +157,7 @@ export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = ({
       </ReactMarkdown>
     </div>
   );
-};
+});
 
 const CodeBlock: React.FC<{ code: string; language: string }> = ({ code, language }) => {
   const [copied, setCopied] = React.useState(false);

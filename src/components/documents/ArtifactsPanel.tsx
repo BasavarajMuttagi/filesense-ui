@@ -15,11 +15,13 @@ import {
   Loader2,
   HardDrive,
 } from "lucide-react";
+import { DocumentListSkeleton } from "../common/SwissSkeleton";
 
 interface ArtifactsPanelProps {
   activeProject: Project | null;
   documents: DocumentItem[];
   isOpen: boolean;
+  loading?: boolean;
   onClose: () => void;
   onDocumentUploaded: () => void;
   onDeleteDocument: (docId: string) => Promise<void>;
@@ -31,6 +33,7 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
   activeProject,
   documents,
   isOpen,
+  loading = false,
   onClose,
   onDeleteDocument,
   onInspectDocument,
@@ -141,7 +144,9 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
 
       {/* Main Files List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5 bg-[#F8FAFC]">
-        {!activeProject ? (
+        {loading ? (
+          <DocumentListSkeleton count={5} />
+        ) : !activeProject ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
             <FolderOpen className="size-7 text-slate-300 mb-2" />
             <p className="text-xs font-medium mb-3 text-slate-600">No project selected</p>

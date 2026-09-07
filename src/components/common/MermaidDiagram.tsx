@@ -116,20 +116,27 @@ function sanitizeMermaidCode(raw: string): string {
   return code;
 }
 
-export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreaming }) => {
+const mermaidSvgCache = new Map<string, string>();
+
+export const MermaidDiagram: React.FC<MermaidDiagramProps> = React.memo(({ code, isStreaming }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [svgContent, setSvgContent] = useState<string>("");
+  const trimmed = code.trim();
+  const cachedSvg = mermaidSvgCache.get(trimmed) || "";
+  const [svgContent, setSvgContent] = useState<string>(cachedSvg);
+  const [prevTrimmed, setPrevTrimmed] = useState(trimmed);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Sync state during render if code changes to a cached entry
+  if (prevTrimmed !== trimmed) {
+    setPrevTrimmed(trimmed);
+    setSvgContent(mermaidSvgCache.get(trimmed) || "");
+    setRenderError(null);
+  }
+
   useEffect(() => {
     let isMounted = true;
-    const trimmed = code.trim();
-    if (!trimmed) return;
-
-    if (isStreaming) {
-      return;
-    }
+    if (!trimmed || isStreaming || mermaidSvgCache.has(trimmed)) return;
 
     const renderDiagram = async () => {
       const sanitized = sanitizeMermaidCode(trimmed);
@@ -137,6 +144,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
 
       try {
         const { svg } = await mermaid.render(id, sanitized);
+        mermaidSvgCache.set(trimmed, svg);
         if (isMounted) {
           setSvgContent(svg);
           setRenderError(null);
@@ -163,6 +171,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
               }
             });
             const { svg } = await mermaid.render(fallbackId, fallbackFlow);
+            mermaidSvgCache.set(trimmed, svg);
             if (isMounted) {
               setSvgContent(svg);
               setRenderError(null);
@@ -185,7 +194,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
     return () => {
       isMounted = false;
     };
-  }, [code, isStreaming]);
+  }, [trimmed, isStreaming]);
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(code);
@@ -252,4 +261,4 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
       />
     </div>
   );
-};
+});
