@@ -7,6 +7,19 @@ export function registerAuthTokenGetter(fn: () => Promise<string | null>) {
   authTokenGetter = fn;
 }
 
+export async function getAuthToken(): Promise<string | null> {
+  const devToken = getDevToken();
+  if (devToken) return devToken;
+  if (authTokenGetter) {
+    try {
+      return await authTokenGetter();
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export function createApiClient(): AxiosInstance {
   const instance = axios.create({
     headers: {

@@ -35,10 +35,19 @@ export interface SourceItem {
   pageEnd?: number | null;
 }
 
+export interface ChatSession {
+  sessionId: string;
+  title: string;
+  createdAt: string | number;
+  updatedAt?: string | number;
+  messageCount: number;
+}
+
 export interface QueryRecord {
   id: string;
   userId?: string;
   projectId?: string | null;
+  sessionId?: string | null;
   question: string;
   answer: string | null;
   sources?: SourceItem[] | null;
@@ -59,4 +68,22 @@ export interface HealthResponse {
 
 export interface ApiErrorResponse {
   error: string;
+}
+
+export interface ChatHistoryItem {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface QueryStreamOptions {
+  question: string;
+  projectId?: string | null;
+  sessionId?: string | null;
+  history?: ChatHistoryItem[];
+  systemInstruction?: string | null;
+  onSources?: (sources: SourceItem[]) => void;
+  onToken?: (token: string) => void;
+  onDone?: (data: { id: string; sessionId?: string; answer: string }) => void;
+  onError?: (err: Error) => void;
+  signal?: AbortSignal;
 }

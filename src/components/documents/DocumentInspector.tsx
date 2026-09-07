@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import type { DocumentItem } from "../../types";
-import { SwissModal } from "../common/SwissModal";
-import { SwissBadge } from "../common/SwissBadge";
-import { SwissButton } from "../common/SwissButton";
-import { FileText, Database, HardDrive, Calendar, Trash2, Layers } from "lucide-react";
+import { FileText, Database, HardDrive, Calendar, Trash2, Layers, X, Loader2 } from "lucide-react";
 
 interface DocumentInspectorProps {
   document: DocumentItem | null;
@@ -49,130 +46,139 @@ export const DocumentInspector: React.FC<DocumentInspectorProps> = ({
   };
 
   return (
-    <SwissModal
-      isOpen={Boolean(document)}
-      onClose={onClose}
-      title="Document Details"
-      maxWidth="lg"
-      footer={
-        <div className="w-full flex items-center justify-between">
-          {!confirmDelete ? (
-            <SwissButton
-              variant="danger"
-              size="sm"
-              icon={<Trash2 className="w-3 h-3" />}
-              onClick={() => setConfirmDelete(true)}
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150 font-sans">
+      <div className="bg-white rounded-2xl border border-zinc-200 shadow-xl max-w-lg w-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+          <div className="flex items-center gap-2.5 min-w-0 pr-4">
+            <FileText className="size-5 text-zinc-900 shrink-0" />
+            <div className="truncate">
+              <h3 className="text-sm font-semibold text-zinc-900 truncate" title={document.fileName}>
+                {document.fileName}
+              </h3>
+              <p className="text-[11px] text-zinc-400 uppercase font-mono">{document.mimeType}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span
+              className={`px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${
+                document.status === "processed"
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                  : document.status === "processing"
+                  ? "bg-amber-50 text-amber-700 border border-amber-200/60"
+                  : document.status === "error"
+                  ? "bg-rose-50 text-rose-700 border border-rose-200/60"
+                  : "bg-zinc-100 text-zinc-600 border border-zinc-200"
+              }`}
             >
-              Delete Document
-            </SwissButton>
+              {document.status}
+            </span>
+
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close inspector"
+              className="size-7 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors cursor-pointer"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-xl flex flex-col gap-1">
+              <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-medium">
+                <HardDrive className="size-3.5" /> Size
+              </span>
+              <span className="text-sm font-semibold text-zinc-900">
+                {formatBytes(document.fileSize)}
+              </span>
+            </div>
+
+            <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-xl flex flex-col gap-1">
+              <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-medium">
+                <Layers className="size-3.5" /> Vector Chunks
+              </span>
+              <span className="text-sm font-semibold text-zinc-900">
+                {document.chunkCount ?? 0} indexed
+              </span>
+            </div>
+
+            <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-xl flex flex-col gap-1 col-span-2">
+              <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-medium">
+                <Database className="size-3.5" /> Document UUID
+              </span>
+              <span className="text-xs font-mono select-all break-all text-zinc-800">
+                {document.id}
+              </span>
+            </div>
+
+            {document.storageUrl && (
+              <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-xl flex flex-col gap-1 col-span-2">
+                <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-medium">
+                  <Database className="size-3.5" /> Storage URL
+                </span>
+                <span className="text-xs font-mono select-all break-all text-zinc-500">
+                  {document.storageUrl}
+                </span>
+              </div>
+            )}
+
+            <div className="p-3 bg-zinc-50 border border-zinc-200/80 rounded-xl flex flex-col gap-1 col-span-2">
+              <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-medium">
+                <Calendar className="size-3.5" /> Created At
+              </span>
+              <span className="text-xs text-zinc-800">
+                {formatDate(document.createdAt)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-3.5 border-t border-zinc-100 bg-zinc-50/50">
+          {!confirmDelete ? (
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer border border-rose-200/70 shadow-2xs"
+            >
+              <Trash2 className="size-3.5" />
+              <span>Delete Document</span>
+            </button>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono text-red-600 font-bold">Confirm purge?</span>
-              <SwissButton
-                variant="danger"
-                size="sm"
+              <button
+                type="button"
                 onClick={handleDelete}
-                loading={isDeleting}
+                disabled={isDeleting}
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
               >
-                Yes, Purge
-              </SwissButton>
-              <SwissButton
-                variant="ghost"
-                size="sm"
+                {isDeleting && <Loader2 className="size-3 animate-spin text-white" />}
+                <span>Confirm Delete</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => setConfirmDelete(false)}
+                className="px-3 py-1.5 text-xs font-medium bg-white hover:bg-zinc-50 text-zinc-700 border border-zinc-200 rounded-lg transition-colors cursor-pointer shadow-2xs"
               >
                 Cancel
-              </SwissButton>
+              </button>
             </div>
           )}
-          <SwissButton variant="outline" size="sm" onClick={onClose}>
-            Close
-          </SwissButton>
-        </div>
-      }
-    >
-      <div className="flex flex-col gap-4">
-        {/* Header summary */}
-        <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-200">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 border border-slate-300 bg-slate-50 flex items-center justify-center shrink-0">
-              <FileText className="w-4 h-4 text-[#E11D48]" />
-            </div>
-            <div>
-              <h4 className="text-sm font-mono font-bold text-slate-900 break-all">
-                {document.fileName}
-              </h4>
-              <span className="text-[10px] font-mono text-slate-500 uppercase">
-                {document.mimeType}
-              </span>
-            </div>
-          </div>
-          <SwissBadge
-            variant={
-              document.status === "processed"
-                ? "processed"
-                : document.status === "processing"
-                ? "processing"
-                : document.status === "error"
-                ? "error"
-                : "created"
-            }
-            pulse={document.status === "processing"}
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3.5 py-1.5 text-xs font-medium bg-white hover:bg-zinc-50 text-zinc-700 border border-zinc-200 rounded-lg transition-colors cursor-pointer shadow-2xs"
           >
-            {document.status}
-          </SwissBadge>
-        </div>
-
-        {/* Data Grid */}
-        <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-          <div className="bg-slate-50 border border-slate-200 p-2.5 flex flex-col gap-1">
-            <span className="text-[10px] uppercase text-slate-600 font-semibold flex items-center gap-1">
-              <HardDrive className="w-3 h-3" /> Size
-            </span>
-            <span className="text-slate-900 font-bold">
-              {formatBytes(document.fileSize)}
-            </span>
-          </div>
-
-          <div className="bg-slate-50 border border-slate-200 p-2.5 flex flex-col gap-1">
-            <span className="text-[10px] uppercase text-slate-600 font-semibold flex items-center gap-1">
-              <Layers className="w-3 h-3" /> Vector Chunks
-            </span>
-            <span className="text-slate-900 font-bold">
-              {document.chunkCount ?? 0} indexed
-            </span>
-          </div>
-
-          <div className="bg-slate-50 border border-slate-200 p-2.5 flex flex-col gap-1 col-span-2">
-            <span className="text-[10px] uppercase text-slate-600 font-semibold flex items-center gap-1">
-              <Database className="w-3 h-3" /> Document UUID
-            </span>
-            <span className="text-slate-900 font-mono text-[11px] select-all break-all">
-              {document.id}
-            </span>
-          </div>
-
-          {document.storageUrl && (
-            <div className="bg-slate-50 border border-slate-200 p-2.5 flex flex-col gap-1 col-span-2">
-              <span className="text-[10px] uppercase text-slate-600 font-semibold flex items-center gap-1">
-                <Database className="w-3 h-3" /> Tigris Storage Path
-              </span>
-              <span className="text-slate-700 font-mono text-[11px] select-all break-all">
-                {document.storageUrl}
-              </span>
-            </div>
-          )}
-
-          <div className="bg-slate-50 border border-slate-200 p-2.5 flex flex-col gap-1 col-span-2">
-            <span className="text-[10px] uppercase text-slate-600 font-semibold flex items-center gap-1">
-              <Calendar className="w-3 h-3" /> Ingestion Timestamp
-            </span>
-            <span className="text-slate-700 font-mono text-[11px]">
-              {formatDate(document.createdAt)}
-            </span>
-          </div>
+            Close
+          </button>
         </div>
       </div>
-    </SwissModal>
+    </div>
   );
 };

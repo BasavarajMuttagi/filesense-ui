@@ -65,7 +65,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#0F172A] text-white hover:bg-slate-800 transition-colors cursor-pointer rounded-xs"
       >
         <Plus className="w-3.5 h-3.5" />
-        <span>Create Case / Project</span>
+        <span>Create Project</span>
       </button>
     );
   }
@@ -77,11 +77,11 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="inline-flex items-center gap-2 px-3 py-1.5 text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 transition-colors cursor-pointer rounded-xs select-none"
-        title="Switch Case / Project"
+        title="Switch Project"
       >
         <Briefcase className="w-3.5 h-3.5 text-slate-500" />
         <span className="font-semibold text-slate-900 max-w-[160px] sm:max-w-[220px] truncate font-sans">
-          {activeProject ? activeProject.title : "Select Case / Project"}
+          {activeProject ? activeProject.title : "Select Project"}
         </span>
         <span className="text-[11px] text-slate-400 font-sans hidden sm:inline">
           ({documents.length} {documents.length === 1 ? "file" : "files"})
@@ -94,7 +94,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         <div className="absolute left-0 sm:right-0 sm:left-auto mt-1.5 w-72 sm:w-80 bg-white border border-slate-200 shadow-lg rounded-xs z-50 py-1.5 animate-in fade-in zoom-in-95 duration-100">
           {/* Header */}
           <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-100">
-            <span>Cases & Projects</span>
+            <span>Projects</span>
             <button
               type="button"
               onClick={() => {
@@ -147,7 +147,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
               >
                 <span className="flex items-center gap-1.5 font-medium">
                   <FileText className="w-3.5 h-3.5 text-slate-400" />
-                  Files in this case ({documents.length})
+                  Files in this project ({documents.length})
                 </span>
                 <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showFilesList ? "rotate-180" : ""}`} />
               </div>
@@ -205,7 +205,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
                   className="text-[11px] text-red-600 hover:underline flex items-center gap-1 cursor-pointer font-sans"
                 >
                   <Trash2 className="w-3 h-3" />
-                  Delete Case / Project
+                  Delete Project
                 </button>
               </div>
             </div>

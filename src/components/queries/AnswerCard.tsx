@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { QueryRecord } from "../../types";
 import { SourceCard } from "./SourceCard";
 import { SwissButton } from "../common/SwissButton";
+import { PerplexityMarkdown } from "../chat/PerplexityMarkdown";
 import { Copy, Check, BookOpen, Sparkles } from "lucide-react";
 
 interface AnswerCardProps {
@@ -63,9 +64,13 @@ export const AnswerCard: React.FC<AnswerCardProps> = ({ query }) => {
         </p>
       </div>
 
-      {/* Answer Prose Body */}
-      <div className="p-4 text-sm leading-relaxed text-slate-800 font-sans whitespace-pre-wrap selection:bg-[#E11D48] selection:text-white border-b border-slate-100">
-        {query.answer || "No response content returned."}
+      {/* Answer Prose Body with Markdown */}
+      <div className="p-4 text-sm leading-relaxed text-slate-800 font-sans border-b border-slate-100">
+        {query.answer ? (
+          <PerplexityMarkdown content={query.answer} />
+        ) : (
+          <span className="text-slate-400 italic">No response content returned.</span>
+        )}
       </div>
 
       {/* Cited Sources Section */}

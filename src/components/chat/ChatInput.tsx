@@ -7,8 +7,8 @@ import {
   Paperclip,
   ArrowUp,
   AlertCircle,
-  Briefcase,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 
 interface ChatInputProps {
@@ -26,7 +26,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onDocumentUploaded,
   onOpenNewProjectModal,
   loading,
-  placeholder = "Ask anything about your case files or documents...",
+  placeholder = "Ask anything about your project documents...",
 }) => {
   const { getToken } = useAuth();
   const [text, setText] = useState("");
@@ -127,19 +127,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-2">
-      {/* Search & Input Box */}
+    <div className="w-full flex flex-col gap-2 font-sans">
+      {/* Modern Card-based Chat Input */}
       <div
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        className={`relative border transition-all duration-150 bg-white shadow-xs rounded-xl flex flex-col p-3 ${
-          isDragging
-            ? "border-[#E11D48] ring-2 ring-rose-100 bg-rose-50/30"
-            : "border-slate-300 focus-within:border-slate-900 focus-within:shadow-md"
+        className={`p-3.5 bg-white border border-zinc-200/90 shadow-xs rounded-2xl transition-all duration-150 ${
+          isDragging ? "ring-2 ring-zinc-900 bg-zinc-50" : "hover:border-zinc-300"
         }`}
       >
-        {/* Hidden file input for paperclip */}
+        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -156,12 +154,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder={placeholder}
-          className="w-full p-1 text-sm font-sans text-slate-900 placeholder:text-slate-400 bg-transparent border-0 focus:outline-none resize-none leading-relaxed min-h-[44px]"
+          aria-label="Ask a question"
+          className="w-full resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none leading-relaxed"
         />
 
-        {/* Bottom bar of input */}
-        <div className="flex items-center justify-between pt-2 mt-1 border-t border-slate-100">
-          {/* Left Actions: Attach File + Active Project Context */}
+        {/* Bottom Action Bar */}
+        <div className="flex items-center justify-between pt-2.5 mt-1 border-t border-zinc-100">
+          {/* Left: Attach Document Button */}
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -173,56 +172,39 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 }
               }}
               disabled={isUploading}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors cursor-pointer disabled:opacity-50"
-              title={activeProject ? "Attach PDF or document to case" : "Create project first to attach files"}
+              aria-label="Attach file"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
             >
-              <Paperclip className="w-3.5 h-3.5" />
-              <span className="font-medium hidden sm:inline">Attach</span>
+              <Paperclip className="size-3.5" />
+              <span>Attach</span>
             </button>
+          </div>
 
-            {activeProject ? (
-              <div className="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-full truncate max-w-[200px]">
-                <Briefcase className="w-3 h-3 text-slate-400 shrink-0" />
-                <span className="truncate font-sans font-medium">{activeProject.title}</span>
-              </div>
+          {/* Right: Send Message Button */}
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!text.trim() || loading || isUploading}
+            aria-label="Send message"
+            className="size-8 rounded-full bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-400 text-white flex items-center justify-center transition-all cursor-pointer shadow-2xs disabled:cursor-not-allowed"
+          >
+            {loading || isUploading ? (
+              <Loader2 className="size-4 animate-spin text-white" />
             ) : (
-              <button
-                type="button"
-                onClick={onOpenNewProjectModal}
-                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-[#E11D48] hover:underline font-medium cursor-pointer"
-              >
-                + Select or create a case first
-              </button>
+              <ArrowUp className="size-4" />
             )}
-          </div>
-
-          {/* Right Action: Submit Query */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleSend}
-              disabled={!text.trim() || loading || isUploading}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                text.trim() && !loading && !isUploading
-                  ? "bg-[#0F172A] text-white hover:bg-slate-800 shadow-xs"
-                  : "bg-slate-100 text-slate-400 cursor-not-allowed"
-              }`}
-              title="Send question (Enter)"
-            >
-              <ArrowUp className="w-4 h-4" />
-            </button>
-          </div>
+          </button>
         </div>
 
-        {/* Upload Progress Overlay / Banner inside input */}
+        {/* Upload Progress Banner */}
         {isUploading && (
-          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 font-sans">
+          <div className="mt-2.5 pt-2 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-500">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-3.5 h-3.5 border-2 border-[#E11D48] border-t-transparent animate-spin rounded-full shrink-0" />
+              <Loader2 className="size-3.5 animate-spin text-zinc-500" />
               <span className="truncate">{uploadStatus}</span>
             </div>
             {uploadProgress && (
-              <span className="font-mono text-[11px] text-slate-400 shrink-0">
+              <span className="font-mono text-zinc-500 shrink-0">
                 {uploadProgress.percentage}%
               </span>
             )}
@@ -231,8 +213,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
         {/* Upload Success indicator */}
         {uploadStatus?.startsWith("✓") && (
-          <div className="mt-2 pt-2 border-t border-slate-100 flex items-center gap-1.5 text-xs text-emerald-700 font-sans">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="mt-2.5 pt-2 border-t border-zinc-100 flex items-center gap-1.5 text-xs text-emerald-600">
+            <CheckCircle2 className="size-4 text-emerald-600" />
             <span>{uploadStatus}</span>
           </div>
         )}
@@ -240,8 +222,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Error notification */}
       {errorMessage && (
-        <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 flex items-center gap-2 text-xs font-sans rounded-xs">
-          <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 flex items-center gap-2 text-xs">
+          <AlertCircle className="size-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}

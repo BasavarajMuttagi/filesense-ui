@@ -15,8 +15,12 @@
     "@tigrisdata/storage": "^3.21.0",
     "axios": "^1.20.0",
     "lucide-react": "^1.41.0",
+    "mermaid": "^11.17.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "tailwind-variants": "^3.3.1",
     "tailwindcss": "^4.3.3",
     "zod": "^4.5.4"
   },
