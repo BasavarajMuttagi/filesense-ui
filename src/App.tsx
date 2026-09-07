@@ -7,7 +7,7 @@ import { listQueries, listSessions } from "./api/queries";
 import type { Project, DocumentItem, QueryRecord, ChatSession } from "./types";
 
 import { AppSidebar } from "./components/layout/AppSidebar";
-import { ClaudeHeader } from "./components/layout/ClaudeHeader";
+import { AppHeader } from "./components/layout/AppHeader";
 import { PerplexityChat } from "./components/chat/PerplexityChat";
 import { ArtifactsPanel } from "./components/documents/ArtifactsPanel";
 import { DocumentInspector } from "./components/documents/DocumentInspector";
@@ -225,8 +225,8 @@ export function App() {
   const activeSession = sessions.find((s) => s.sessionId === activeSessionId) || null;
 
   return (
-    <div className="h-screen w-screen flex bg-[#FAF9F6] text-zinc-900 font-sans overflow-hidden">
-      {/* 1. Left Navigation Sidebar */}
+    <div className="h-screen w-screen flex bg-[#F8FAFC] text-slate-900 font-sans overflow-hidden">
+      {/* 1. Left Swiss Navigation Sidebar */}
       <AppSidebar
         projects={projects}
         activeProject={activeProject}
@@ -234,19 +234,17 @@ export function App() {
         activeSessionId={activeSessionId}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-        onSelectProject={(id) => {
-          setSelectedProjectId(id);
-        }}
+        onSelectProject={(id) => setSelectedProjectId(id)}
         onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
         onDeleteProject={handleDeleteProject}
         onNewChat={handleNewChat}
         onSelectSession={handleSelectSession}
       />
 
-      {/* 2. Center Column: Header & Main Chat Stream */}
-      <div className="flex-1 flex flex-col h-full min-w-0 bg-[#FAF9F6]">
+      {/* 2. Center Column: Swiss Header & Main Query Stream */}
+      <div className="flex-1 flex flex-col h-full min-w-0 bg-[#F8FAFC]">
         {/* Top Header */}
-        <ClaudeHeader
+        <AppHeader
           projects={projects}
           activeProject={activeProject}
           activeSession={activeSession}
@@ -258,7 +256,7 @@ export function App() {
           onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
         />
 
-        {/* Central Chat View */}
+        {/* Central Chat Stream */}
         <main className="flex-1 flex flex-col overflow-y-auto relative">
           <PerplexityChat
             key={`${selectedProjectId || "default"}-${chatKey}`}

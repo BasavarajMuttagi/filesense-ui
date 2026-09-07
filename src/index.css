@@ -1,1 +1,112 @@
 @import "tailwindcss";
+
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* FileSense Swiss Color Palette */
+  --fs-canvas: #F8FAFC;
+  --fs-surface: #FFFFFF;
+  --fs-surface-hover: #F1F5F9;
+  --fs-border: #E2E8F0;
+  --fs-border-strong: #CBD5E1;
+  --fs-border-subtle: #F1F5F9;
+
+  /* Brand Accents */
+  --fs-cobalt: #0052FF;
+  --fs-cobalt-hover: #0045D8;
+  --fs-cobalt-subtle: #EFF4FF;
+  --fs-cobalt-border: #BFDBFE;
+
+  --fs-cyan: #0284C7;
+  --fs-cyan-subtle: #F0F9FF;
+  --fs-cyan-border: #BAE6FD;
+
+  /* Signals */
+  --fs-emerald: #059669;
+  --fs-emerald-subtle: #ECFDF5;
+  --fs-emerald-border: #A7F3D0;
+
+  --fs-amber: #D97706;
+  --fs-amber-subtle: #FFFBEB;
+  --fs-amber-border: #FDE68A;
+
+  --fs-crimson: #DC2626;
+  --fs-crimson-subtle: #FEF2F2;
+  --fs-crimson-border: #FECACA;
+
+  /* Typography Inks */
+  --fs-ink-primary: #090D1A;
+  --fs-ink-secondary: #334155;
+  --fs-ink-muted: #64748B;
+  --fs-ink-faint: #94A3B8;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--fs-canvas);
+  color: var(--fs-ink-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Monospace telemetry and badges */
+code, kbd, samp, pre, .font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Swiss Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Swiss Hairline Rules */
+.border-swiss {
+  border-color: var(--fs-border);
+}
+
+.border-swiss-strong {
+  border-color: var(--fs-border-strong);
+}
+
+/* Swiss Grid subtle background texture for empty / hero states */
+.swiss-grid-pattern {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(226, 232, 240, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 240, 0.45) 1px, transparent 1px);
+}
+
+/* Radar pulse animation for document ingestion & streaming */
+@keyframes radarPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 82, 255, 0.45);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(0, 82, 255, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 82, 255, 0);
+  }
+}
+
+.animate-radar {
+  animation: radarPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}

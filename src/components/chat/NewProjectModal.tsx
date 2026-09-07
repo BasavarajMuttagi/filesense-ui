@@ -48,19 +48,24 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-2xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150 font-sans">
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-xl max-w-md w-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150 font-sans">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-          <div className="flex items-center gap-2">
-            <FolderPlus className="size-5 text-zinc-900" />
-            <h3 className="text-base font-semibold text-zinc-900">New Project</h3>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="size-8 rounded-lg bg-blue-50 text-[#0052FF] flex items-center justify-center shrink-0">
+              <FolderPlus className="size-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">New Project Workspace</h3>
+              <p className="text-[11px] text-slate-500">Organize documents and query sessions</p>
+            </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="size-7 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors cursor-pointer"
+            className="size-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
           >
             <X className="size-4" />
           </button>
@@ -69,32 +74,32 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="project-title" className="text-xs font-semibold text-zinc-700">
-              Project Name
+            <label htmlFor="project-title" className="text-xs font-semibold text-slate-700">
+              Project Title
             </label>
             <input
               id="project-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Agentic AI Pipeline, Q3 Docs"
+              placeholder="e.g. LLM Inference Specs, Q3 Financials"
               autoFocus
-              className="w-full px-3 py-2 text-sm rounded-xl border border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0052FF] focus:ring-2 focus:ring-[#0052FF]/15 transition-all"
             />
             {error && <p className="text-xs text-rose-600">{error}</p>}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="project-description" className="text-xs font-semibold text-zinc-700">
+            <label htmlFor="project-description" className="text-xs font-semibold text-slate-700">
               Description (Optional)
             </label>
             <textarea
               id="project-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Project scope, context, or notes..."
+              placeholder="Scope, corpus context, or technical notes..."
               rows={3}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-zinc-200 bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none transition-all"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0052FF] focus:ring-2 focus:ring-[#0052FF]/15 resize-none transition-all"
             />
           </div>
 
@@ -104,14 +109,14 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-xs font-medium bg-white hover:bg-zinc-50 text-zinc-700 border border-zinc-200 rounded-xl transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+              className="px-3.5 py-2 text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-lg transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl transition-colors cursor-pointer shadow-2xs disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-[#0052FF] hover:bg-[#0045D8] text-white rounded-lg transition-colors cursor-pointer shadow-xs disabled:opacity-50"
             >
               {loading && <Loader2 className="size-3.5 animate-spin text-white" />}
               <span>Create Project</span>

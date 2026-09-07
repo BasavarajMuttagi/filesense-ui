@@ -15,7 +15,7 @@ export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = ({
   isStreaming,
   onCitationClick,
 }) => {
-  // Pre-process inline citations like [1] or [1][2] into sleek, modern circular pills
+  // Pre-process inline citations like [1] or [1][2] into crisp Swiss circular pills
   const renderFormattedText = (text: string) => {
     const parts = text.split(/(\[\d+\])/g);
     if (parts.length === 1) return text;
@@ -30,8 +30,8 @@ export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = ({
             key={i}
             type="button"
             onClick={() => onCitationClick?.(sourceIndex)}
-            className="inline-flex items-center justify-center font-mono text-[10px] font-semibold text-zinc-600 bg-zinc-100 hover:bg-zinc-200 hover:text-zinc-900 size-4.5 rounded-full border border-zinc-300/70 transition-colors cursor-pointer align-baseline mx-0.5 shadow-2xs"
-            title={`View source ${citationNum}`}
+            className="inline-flex items-center justify-center font-mono text-[10px] font-bold text-[#0052FF] bg-blue-50 hover:bg-blue-100 size-4.5 rounded-md border border-blue-200 transition-colors cursor-pointer align-baseline mx-0.5 shadow-2xs"
+            title={`View source citation [${citationNum}]`}
           >
             {citationNum}
           </button>
@@ -42,27 +42,27 @@ export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = ({
   };
 
   return (
-    <div className="perplexity-markdown text-sm text-zinc-800 leading-relaxed font-sans space-y-3.5">
+    <div className="perplexity-markdown text-sm text-slate-800 leading-relaxed font-sans space-y-3.5">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => (
-            <h1 className="text-xl font-bold text-zinc-900 mt-5 mb-2.5 tracking-tight font-sans">
+            <h1 className="text-xl font-extrabold text-slate-900 mt-5 mb-2.5 tracking-tight font-sans">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="text-lg font-bold text-zinc-900 mt-4 mb-2 tracking-tight font-sans">
+            <h2 className="text-lg font-bold text-slate-900 mt-4 mb-2 tracking-tight font-sans">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-base font-semibold text-zinc-900 mt-3 mb-1.5 tracking-tight font-sans">
+            <h3 className="text-base font-bold text-slate-900 mt-3 mb-1.5 tracking-tight font-sans">
               {children}
             </h3>
           ),
           h4: ({ children }) => (
-            <h4 className="text-sm font-semibold text-zinc-900 mt-2 mb-1 font-sans">
+            <h4 className="text-sm font-semibold text-slate-900 mt-2 mb-1 font-sans">
               {children}
             </h4>
           ),
@@ -79,12 +79,12 @@ export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = ({
             );
           },
           ul: ({ children }) => (
-            <ul className="list-disc list-outside pl-5 my-2.5 space-y-1 text-zinc-700">
+            <ul className="list-disc list-outside pl-5 my-2.5 space-y-1 text-slate-700">
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal list-outside pl-5 my-2.5 space-y-1 text-zinc-700">
+            <ol className="list-decimal list-outside pl-5 my-2.5 space-y-1 text-slate-700">
               {children}
             </ol>
           ),
@@ -101,29 +101,29 @@ export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = ({
             );
           },
           table: ({ children }) => (
-            <div className="my-3 overflow-x-auto rounded-lg border border-zinc-200 shadow-2xs">
-              <table className="min-w-full divide-y divide-zinc-200 text-xs text-left">
+            <div className="my-3 overflow-x-auto rounded-xl border border-slate-200 shadow-2xs bg-white">
+              <table className="min-w-full divide-y divide-slate-200 text-xs text-left">
                 {children}
               </table>
             </div>
           ),
           thead: ({ children }) => (
-            <thead className="bg-zinc-50 font-semibold text-zinc-900">
+            <thead className="bg-slate-50 font-bold text-slate-900 uppercase font-mono text-[11px] tracking-wider">
               {children}
             </thead>
           ),
           th: ({ children }) => (
-            <th className="px-3 py-2 text-xs font-semibold text-zinc-700">
+            <th className="px-3.5 py-2.5 font-semibold text-slate-700">
               {children}
             </th>
           ),
           td: ({ children }) => (
-            <td className="px-3 py-2 border-t border-zinc-100 text-zinc-700">
+            <td className="px-3.5 py-2.5 border-t border-slate-100 text-slate-700">
               {children}
             </td>
           ),
           blockquote: ({ children }) => (
-            <blockquote className="border-l-2 border-zinc-400 pl-3.5 my-2.5 text-zinc-600 italic bg-zinc-50/50 py-1.5 rounded-r">
+            <blockquote className="border-l-3 border-[#0052FF] pl-4 my-3 text-slate-700 italic bg-blue-50/40 py-2 rounded-r-lg">
               {children}
             </blockquote>
           ),
@@ -141,7 +141,7 @@ export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = ({
             if (isInline) {
               return (
                 <code
-                  className="bg-zinc-100 text-zinc-800 text-[12px] font-mono px-1.5 py-0.5 rounded font-medium"
+                  className="bg-slate-100 text-slate-900 text-[12px] font-mono px-1.5 py-0.5 rounded border border-slate-200/80 font-medium"
                   {...props}
                 >
                   {children}
@@ -169,19 +169,19 @@ const CodeBlock: React.FC<{ code: string; language: string }> = ({ code, languag
   };
 
   return (
-    <div className="my-3.5 border border-zinc-800/80 bg-[#121316] rounded-xl overflow-hidden text-xs shadow-xs">
-      <div className="flex items-center justify-between px-3.5 py-2 bg-[#18191E] border-b border-zinc-800/60 text-zinc-400 font-mono text-[11px]">
-        <span className="font-medium text-zinc-300">{language || "code"}</span>
+    <div className="my-3.5 border border-slate-800 bg-[#090D1A] rounded-xl overflow-hidden text-xs shadow-xs">
+      <div className="flex items-center justify-between px-3.5 py-2 bg-[#0F172A] border-b border-slate-800 text-slate-400 font-mono text-[11px]">
+        <span className="font-semibold text-slate-300 uppercase">{language || "source"}</span>
         <button
           type="button"
           onClick={handleCopy}
-          className="inline-flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
         >
           {copied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
           <span>{copied ? "Copied" : "Copy"}</span>
         </button>
       </div>
-      <pre className="p-3.5 overflow-x-auto text-zinc-100 font-mono leading-relaxed">
+      <pre className="p-4 overflow-x-auto text-slate-100 font-mono leading-relaxed text-[12px]">
         <code>{code}</code>
       </pre>
     </div>

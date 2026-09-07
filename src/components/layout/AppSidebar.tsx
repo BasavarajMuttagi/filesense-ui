@@ -48,15 +48,15 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllSessions, setShowAllSessions] = useState(false);
 
-  const visibleProjects = showAllProjects ? projects : projects.slice(0, 5);
+  const visibleProjects = showAllProjects ? projects : projects.slice(0, 6);
   const visibleSessions = showAllSessions ? sessions : sessions.slice(0, 8);
 
   if (collapsed) {
     return (
-      <aside className="w-14 h-screen bg-zinc-50 border-r border-zinc-200 flex flex-col items-center py-3 shrink-0 z-30 font-sans select-none">
-        {/* Brand Icon */}
-        <div className="size-8 bg-zinc-900 flex items-center justify-center mb-4 shrink-0 rounded-xl shadow-xs">
-          <Layers className="size-4 text-white" />
+      <aside className="w-14 h-screen bg-white border-r border-slate-200 flex flex-col items-center py-3 shrink-0 z-30 font-sans select-none">
+        {/* Brand Mark */}
+        <div className="size-9 bg-slate-900 rounded-lg flex items-center justify-center mb-4 shrink-0 shadow-2xs">
+          <Layers className="size-4 text-[#0052FF]" />
         </div>
 
         {/* Quick New Chat Button */}
@@ -64,7 +64,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           type="button"
           onClick={onNewChat}
           aria-label="New chat session"
-          className="size-8 flex items-center justify-center rounded-lg bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950 transition-colors shadow-2xs mb-4 cursor-pointer"
+          title="New Chat"
+          className="size-8 flex items-center justify-center rounded-lg bg-blue-50 text-[#0052FF] hover:bg-blue-100 transition-colors border border-blue-200/60 mb-4 cursor-pointer"
         >
           <Plus className="size-4" />
         </button>
@@ -78,11 +79,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 key={p.id}
                 type="button"
                 onClick={() => onSelectProject(p.id)}
-                aria-label={p.title}
+                title={p.title}
                 className={`size-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   isActive
-                    ? "bg-zinc-900 text-white shadow-2xs"
-                    : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-950"
+                    ? "bg-[#0052FF] text-white shadow-xs"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
                 {p.title.charAt(0).toUpperCase()}
@@ -91,12 +92,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           })}
         </div>
 
-        {/* Expand Trigger Button */}
+        {/* Expand Trigger */}
         <button
           type="button"
           onClick={onToggleCollapse}
           aria-label="Expand sidebar"
-          className="mt-auto size-8 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-200 hover:text-zinc-800 transition-colors cursor-pointer"
+          title="Expand sidebar"
+          className="mt-auto size-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
         >
           <ChevronRight className="size-4" />
         </button>
@@ -105,42 +107,59 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   }
 
   return (
-    <aside className="w-64 h-screen bg-zinc-50/80 border-r border-zinc-200 flex flex-col shrink-0 z-30 font-sans select-none">
-      {/* Top Header Section */}
-      <div className="p-3 flex items-center justify-between border-b border-zinc-200/80">
-        {/* + New Chat Button */}
-        <button
-          type="button"
-          onClick={onNewChat}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-200 rounded-xl shadow-2xs transition-all cursor-pointer mr-2"
-        >
-          <Plus className="size-3.5 text-zinc-600" />
-          <span>New Chat</span>
-        </button>
+    <aside className="w-64 h-screen bg-[#F8FAFC] border-r border-slate-200 flex flex-col shrink-0 z-30 font-sans select-none">
+      {/* Top Header / Brand Section */}
+      <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-white">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="size-8 rounded-lg bg-slate-900 flex items-center justify-center text-[#0052FF] shrink-0 shadow-2xs">
+            <Layers className="size-4" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-xs font-extrabold tracking-tight text-slate-900 truncate">
+              FileSense
+            </span>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-600">
+              Intelligence // 01
+            </span>
+          </div>
+        </div>
 
         <button
           type="button"
           onClick={onToggleCollapse}
           aria-label="Collapse sidebar"
-          className="size-7 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-200/70 hover:text-zinc-700 transition-colors cursor-pointer"
+          title="Collapse sidebar"
+          className="size-7 flex items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
         >
           <ChevronLeft className="size-4" />
         </button>
       </div>
 
-      {/* Main Navigation Scroll Area */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-6">
-        {/* PROJECTS SECTION */}
+      {/* New Chat Primary Action */}
+      <div className="p-3 pb-0">
+        <button
+          type="button"
+          onClick={onNewChat}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold bg-[#0052FF] hover:bg-[#0045D8] text-white rounded-lg shadow-xs transition-all cursor-pointer"
+        >
+          <Plus className="size-3.5" />
+          <span>New Query Thread</span>
+        </button>
+      </div>
+
+      {/* Navigation Scroll Area */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        {/* PROJECTS / WORKSPACES SECTION */}
         <div>
-          <div className="flex items-center justify-between px-1 mb-1.5 text-zinc-500">
+          <div className="flex items-center justify-between px-1 mb-1.5">
             <button
               type="button"
               onClick={() => setProjectsExpanded(!projectsExpanded)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-800 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
             >
               <span>Projects</span>
               <ChevronDown
-                className={`size-3.5 transition-transform duration-200 ${
+                className={`size-3 transition-transform duration-200 ${
                   projectsExpanded ? "" : "-rotate-90"
                 }`}
               />
@@ -150,16 +169,26 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               type="button"
               onClick={onOpenNewProjectModal}
               aria-label="Create new project"
-              className="size-5 flex items-center justify-center rounded text-zinc-400 hover:bg-zinc-200 hover:text-zinc-800 transition-colors cursor-pointer"
+              title="Create new project"
+              className="size-5 flex items-center justify-center rounded text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 transition-colors cursor-pointer"
             >
               <Plus className="size-3.5" />
             </button>
           </div>
 
           {projectsExpanded && (
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {projects.length === 0 ? (
-                <p className="px-2 py-2 text-xs text-zinc-400 italic">No projects</p>
+                <div className="px-2 py-3 text-center border border-dashed border-slate-200 rounded-lg">
+                  <p className="text-xs text-slate-600">No projects yet</p>
+                  <button
+                    type="button"
+                    onClick={onOpenNewProjectModal}
+                    className="mt-1.5 text-[11px] font-semibold text-[#0052FF] hover:underline"
+                  >
+                    + Create Project
+                  </button>
+                </div>
               ) : (
                 visibleProjects.map((p) => {
                   const isActive = p.id === activeProject?.id;
@@ -167,61 +196,73 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     <div
                       key={p.id}
                       onClick={() => onSelectProject(p.id)}
-                      className={`group relative flex items-center justify-between px-2.5 py-1.5 text-xs rounded-xl cursor-pointer transition-all ${
+                      className={`group relative flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg cursor-pointer transition-all ${
                         isActive
-                          ? "bg-white text-zinc-950 font-semibold shadow-2xs border border-zinc-200/80"
-                          : "text-zinc-600 hover:bg-zinc-200/50 hover:text-zinc-900 border border-transparent"
+                          ? "bg-white text-slate-950 font-semibold shadow-2xs border border-slate-200"
+                          : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 border border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <Folder className={`size-3.5 shrink-0 ${isActive ? "text-zinc-900" : "text-zinc-400"}`} />
-                        <span className="truncate max-w-[145px]">{p.title}</span>
+                        <Folder
+                          className={`size-3.5 shrink-0 ${
+                            isActive ? "text-[#0052FF]" : "text-slate-400"
+                          }`}
+                        />
+                        <span className="truncate max-w-[130px]">{p.title}</span>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm(`Delete project "${p.title}" and all its documents?`)) {
-                            onDeleteProject(p.id);
-                          }
-                        }}
-                        aria-label="Delete project"
-                        className="opacity-0 group-hover:opacity-100 size-5 flex items-center justify-center rounded text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
-                      >
-                        <Trash2 className="size-3" />
-                      </button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {typeof p.documentCount === "number" && p.documentCount > 0 && (
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 group-hover:bg-slate-200">
+                            {p.documentCount}
+                          </span>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(`Delete project "${p.title}" and all its documents?`)) {
+                              onDeleteProject(p.id);
+                            }
+                          }}
+                          aria-label="Delete project"
+                          title="Delete project"
+                          className="opacity-0 group-hover:opacity-100 size-5 flex items-center justify-center rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer ml-1"
+                        >
+                          <Trash2 className="size-3" />
+                        </button>
+                      </div>
                     </div>
                   );
                 })
               )}
 
-              {/* Show More / Show Less for Projects */}
-              {projects.length > 5 && (
+              {projects.length > 6 && (
                 <button
                   type="button"
                   onClick={() => setShowAllProjects(!showAllProjects)}
-                  className="flex items-center gap-2 px-2.5 py-1 text-xs text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer w-full text-left mt-0.5"
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-800 transition-colors cursor-pointer w-full text-left mt-0.5"
                 >
                   <MoreHorizontal className="size-3.5 shrink-0" />
-                  <span>{showAllProjects ? "Show less" : "Show more"}</span>
+                  <span>{showAllProjects ? "Show less" : `+${projects.length - 6} more`}</span>
                 </button>
               )}
             </div>
           )}
         </div>
 
-        {/* RECENT CHATS SECTION */}
+        {/* CHAT SESSIONS / THREADS SECTION */}
         <div>
-          <div className="flex items-center justify-between px-1 mb-1.5 text-zinc-500">
+          <div className="flex items-center justify-between px-1 mb-1.5">
             <button
               type="button"
               onClick={() => setSessionsExpanded(!sessionsExpanded)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-800 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
             >
-              <span>Recent Chats</span>
+              <span>Recent Threads</span>
               <ChevronDown
-                className={`size-3.5 transition-transform duration-200 ${
+                className={`size-3 transition-transform duration-200 ${
                   sessionsExpanded ? "" : "-rotate-90"
                 }`}
               />
@@ -231,7 +272,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               type="button"
               onClick={onNewChat}
               aria-label="New chat"
-              className="size-5 flex items-center justify-center rounded text-zinc-400 hover:bg-zinc-200 hover:text-zinc-800 transition-colors cursor-pointer"
+              title="New thread"
+              className="size-5 flex items-center justify-center rounded text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 transition-colors cursor-pointer"
             >
               <Plus className="size-3.5" />
             </button>
@@ -240,9 +282,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           {sessionsExpanded && (
             <div className="space-y-0.5">
               {!activeProject ? (
-                <p className="px-2 py-2 text-xs text-zinc-400 italic">Select a project</p>
+                <p className="px-2 py-2 text-xs text-slate-600 italic">Select a project</p>
               ) : sessions.length === 0 ? (
-                <p className="px-2 py-2 text-xs text-zinc-400 italic">No chat sessions</p>
+                <p className="px-2 py-2 text-xs text-slate-600 italic">No query sessions</p>
               ) : (
                 visibleSessions.map((s) => {
                   const isActive = s.sessionId === activeSessionId;
@@ -250,13 +292,17 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     <div
                       key={s.sessionId}
                       onClick={() => onSelectSession(s.sessionId)}
-                      className={`flex items-center gap-2 px-2.5 py-1.5 text-xs rounded-xl cursor-pointer transition-all ${
+                      className={`flex items-center gap-2 px-2.5 py-1.5 text-xs rounded-lg cursor-pointer transition-all ${
                         isActive
-                          ? "bg-white text-zinc-950 font-semibold shadow-2xs border border-zinc-200/80"
-                          : "text-zinc-600 hover:bg-zinc-200/50 hover:text-zinc-900 border border-transparent"
+                          ? "bg-white text-slate-950 font-semibold shadow-2xs border border-slate-200"
+                          : "text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 border border-transparent"
                       }`}
                     >
-                      <MessageSquare className={`size-3 shrink-0 ${isActive ? "text-zinc-900" : "text-zinc-400"}`} />
+                      <MessageSquare
+                        className={`size-3 shrink-0 ${
+                          isActive ? "text-[#0052FF]" : "text-slate-400"
+                        }`}
+                      />
                       <span className="truncate leading-relaxed" title={s.title}>
                         {s.title}
                       </span>
@@ -265,15 +311,14 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 })
               )}
 
-              {/* Show More / Show Less for Sessions */}
               {sessions.length > 8 && (
                 <button
                   type="button"
                   onClick={() => setShowAllSessions(!showAllSessions)}
-                  className="flex items-center gap-2 px-2.5 py-1 text-xs text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer w-full text-left mt-0.5"
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-600 hover:text-slate-800 transition-colors cursor-pointer w-full text-left mt-0.5"
                 >
                   <MoreHorizontal className="size-3.5 shrink-0" />
-                  <span>{showAllSessions ? "Show less" : "Show more"}</span>
+                  <span>{showAllSessions ? "Show less" : `+${sessions.length - 8} more`}</span>
                 </button>
               )}
             </div>
@@ -282,7 +327,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       </div>
 
       {/* USER ACCOUNT FOOTER */}
-      <div className="p-3 border-t border-zinc-200/80 bg-white">
+      <div className="p-3 border-t border-slate-200 bg-white">
         <SignedIn>
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between min-w-0">
@@ -290,22 +335,22 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 <UserButton
                   appearance={{
                     elements: {
-                      userButtonAvatarBox: "size-7 rounded-full border border-zinc-200",
+                      userButtonAvatarBox: "size-7 rounded-lg border border-slate-200",
                     },
                   }}
                 />
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-semibold text-zinc-900 truncate">
-                    {user?.fullName || user?.firstName || "Account"}
+                  <span className="text-xs font-semibold text-slate-900 truncate">
+                    {user?.fullName || user?.firstName || "Operator"}
                   </span>
-                  <span className="text-[10px] text-zinc-400">Pro Workspace</span>
+                  <span className="text-[10px] font-mono text-slate-600">Enterprise Node</span>
                 </div>
               </div>
 
               <button
                 type="button"
                 aria-label="Notifications"
-                className="size-7 flex items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors cursor-pointer"
+                className="size-7 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
               >
                 <Bell className="size-3.5" />
               </button>
@@ -313,10 +358,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
             <button
               type="button"
-              className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-900 pt-1 transition-colors cursor-pointer"
+              className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-900 pt-1 transition-colors cursor-pointer"
             >
               <UserPlus className="size-3.5" />
-              <span>Add team members</span>
+              <span>Invite collaborators</span>
             </button>
           </div>
         </SignedIn>
@@ -325,7 +370,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
           <SignInButton mode="modal">
             <button
               type="button"
-              className="w-full py-2 text-xs font-medium rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white transition-colors cursor-pointer shadow-2xs"
+              className="w-full py-2 text-xs font-semibold rounded-lg bg-slate-900 hover:bg-slate-800 text-white transition-colors cursor-pointer shadow-2xs"
             >
               Sign In
             </button>

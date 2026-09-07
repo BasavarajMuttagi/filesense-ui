@@ -1,7 +1,7 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
 
-export type SwissButtonVariant = "primary" | "vermilion" | "outline" | "ghost" | "danger";
+export type SwissButtonVariant = "cobalt" | "primary" | "outline" | "ghost" | "danger";
 export type SwissButtonSize = "sm" | "md" | "lg";
 
 interface SwissButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,7 +13,7 @@ interface SwissButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export const SwissButton: React.FC<SwissButtonProps> = ({
   children,
-  variant = "primary",
+  variant = "cobalt",
   size = "md",
   loading = false,
   icon,
@@ -21,8 +21,8 @@ export const SwissButton: React.FC<SwissButtonProps> = ({
   disabled,
   ...props
 }) => {
-  let baseStyles =
-    "inline-flex items-center justify-center font-mono uppercase tracking-wider font-semibold transition-all duration-150 select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border";
+  const baseStyles =
+    "inline-flex items-center justify-center font-sans font-semibold transition-all duration-150 select-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border rounded-lg active:scale-[0.98]";
 
   let sizeStyles = "px-3.5 py-1.5 text-xs gap-2";
   if (size === "sm") sizeStyles = "px-2.5 py-1 text-[11px] gap-1.5";
@@ -30,25 +30,25 @@ export const SwissButton: React.FC<SwissButtonProps> = ({
 
   let variantStyles = "";
   switch (variant) {
+    case "cobalt":
+      variantStyles =
+        "bg-[#0052FF] text-white border-[#0052FF] hover:bg-[#0045D8] hover:border-[#0045D8] shadow-xs";
+      break;
     case "primary":
       variantStyles =
-        "bg-[#0F172A] text-white border-[#0F172A] hover:bg-black hover:border-black active:translate-y-[1px]";
-      break;
-    case "vermilion":
-      variantStyles =
-        "bg-[#E11D48] text-white border-[#E11D48] hover:bg-[#BE123C] hover:border-[#BE123C] active:translate-y-[1px]";
+        "bg-slate-900 text-white border-slate-900 hover:bg-slate-800 hover:border-slate-800 shadow-xs";
       break;
     case "outline":
       variantStyles =
-        "bg-white text-slate-800 border-slate-300 hover:bg-slate-50 hover:border-slate-800 active:translate-y-[1px]";
+        "bg-white text-slate-800 border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-2xs";
       break;
     case "ghost":
       variantStyles =
-        "bg-transparent text-slate-700 border-transparent hover:bg-slate-100 hover:text-slate-900";
+        "bg-transparent text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900";
       break;
     case "danger":
       variantStyles =
-        "bg-white text-red-700 border-red-300 hover:bg-red-50 hover:border-red-600 active:translate-y-[1px]";
+        "bg-white text-rose-600 border-rose-200 hover:bg-rose-50 hover:border-rose-300 shadow-2xs";
       break;
   }
 

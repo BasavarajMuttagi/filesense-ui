@@ -6,7 +6,6 @@ interface EmptyStateProps {
   description: string;
   icon?: React.ReactNode;
   action?: React.ReactNode;
-  code?: string;
   className?: string;
 }
 
@@ -19,15 +18,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`border border-dashed border-slate-300 p-8 flex flex-col items-center justify-center text-center bg-white/50 ${className}`}
+      className={`border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-slate-50/50 font-sans ${className}`}
     >
-      <div className="w-10 h-10 border border-slate-300 bg-white flex items-center justify-center text-slate-700 mb-3.5">
-        {icon || <FolderPlus className="w-5 h-5 text-slate-500" />}
+      <div className="size-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 mb-3 shadow-2xs">
+        {icon || <FolderPlus className="size-5 text-[#0052FF]" />}
       </div>
       <h4 className="text-sm font-bold tracking-tight text-slate-900 mb-1">
         {title}
       </h4>
-      <p className="text-xs text-slate-500 max-w-sm mb-4 leading-relaxed font-sans">
+      <p className="text-xs text-slate-600 max-w-sm mb-4 leading-relaxed">
         {description}
       </p>
       {action && <div>{action}</div>}

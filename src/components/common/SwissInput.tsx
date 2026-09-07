@@ -19,19 +19,19 @@ export const SwissInput: React.FC<SwissInputProps> = ({
   const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
 
   return (
-    <div className="w-full flex flex-col gap-1.5">
+    <div className="w-full flex flex-col gap-1.5 font-sans">
       {(label || sublabel) && (
         <div className="flex items-center justify-between">
           {label && (
             <label
               htmlFor={inputId}
-              className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-700"
+              className="text-xs font-semibold text-slate-800"
             >
               {label}
             </label>
           )}
           {sublabel && (
-            <span className="text-[10px] font-mono text-slate-600 uppercase">
+            <span className="text-[11px] font-mono text-slate-600">
               {sublabel}
             </span>
           )}
@@ -40,13 +40,15 @@ export const SwissInput: React.FC<SwissInputProps> = ({
       <input
         id={inputId}
         className={`w-full px-3 py-2 text-sm bg-white border ${
-          error ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:border-slate-900"
-        } rounded-none text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-1 transition-colors ${className}`}
+          error
+            ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+            : "border-slate-200 focus:border-[#0052FF] focus:ring-2 focus:ring-[#0052FF]/15"
+        } rounded-lg text-slate-900 placeholder:text-slate-600 focus:outline-none transition-all ${className}`}
         {...props}
       />
-      {error && <span className="text-[11px] font-mono text-red-600">{error}</span>}
+      {error && <span className="text-xs text-rose-600">{error}</span>}
       {!error && helperText && (
-        <span className="text-[11px] font-mono text-slate-600">{helperText}</span>
+        <span className="text-xs text-slate-600">{helperText}</span>
       )}
     </div>
   );
@@ -72,19 +74,19 @@ export const SwissTextarea: React.FC<SwissTextareaProps> = ({
   const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
 
   return (
-    <div className="w-full flex flex-col gap-1.5">
+    <div className="w-full flex flex-col gap-1.5 font-sans">
       {(label || sublabel) && (
         <div className="flex items-center justify-between">
           {label && (
             <label
               htmlFor={inputId}
-              className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-700"
+              className="text-xs font-semibold text-slate-800"
             >
               {label}
             </label>
           )}
           {sublabel && (
-            <span className="text-[10px] font-mono text-slate-600 uppercase">
+            <span className="text-[11px] font-mono text-slate-600">
               {sublabel}
             </span>
           )}
@@ -94,13 +96,15 @@ export const SwissTextarea: React.FC<SwissTextareaProps> = ({
         id={inputId}
         rows={rows}
         className={`w-full px-3 py-2 text-sm bg-white border ${
-          error ? "border-red-500 focus:ring-red-500" : "border-slate-300 focus:border-slate-900"
-        } rounded-none text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-1 transition-colors resize-y ${className}`}
+          error
+            ? "border-rose-300 focus:ring-rose-500/20 focus:border-rose-500"
+            : "border-slate-200 focus:border-[#0052FF] focus:ring-2 focus:ring-[#0052FF]/15"
+        } rounded-lg text-slate-900 placeholder:text-slate-600 focus:outline-none transition-all resize-y ${className}`}
         {...props}
       />
-      {error && <span className="text-[11px] font-mono text-red-600">{error}</span>}
+      {error && <span className="text-xs text-rose-600">{error}</span>}
       {!error && helperText && (
-        <span className="text-[11px] font-mono text-slate-600">{helperText}</span>
+        <span className="text-xs text-slate-600">{helperText}</span>
       )}
     </div>
   );

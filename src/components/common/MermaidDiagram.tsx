@@ -25,12 +25,6 @@ if (typeof window !== "undefined") {
   });
 }
 
-/**
- * Sanitizes and repairs common Mermaid LLM mistakes:
- * 1. Converts invalid pseudo-gantt syntax into clean flowchart TD
- * 2. Wraps unquoted node text inside brackets: [Label (Extra)] -> ["Label (Extra)"]
- * 3. Strips unneeded markdown ticks
- */
 function sanitizeMermaidCode(raw: string): string {
   let code = raw.trim();
 
@@ -41,7 +35,7 @@ function sanitizeMermaidCode(raw: string): string {
   if (/^gantt\b/i.test(code)) {
     const lines = code.split("\n");
     const sections: { title: string; items: string[] }[] = [];
-    let curTitle = "Career & Timeline";
+    let curTitle = "Process & Timeline";
     let curSection = "Milestones";
     let curItems: string[] = [];
 
@@ -69,7 +63,6 @@ function sanitizeMermaidCode(raw: string): string {
         continue;
       }
 
-      // Format: "Task Name :a1, 2022-07, 2.5 months" -> "Task Name"
       const taskName = line.split(":")[0].trim();
       const meta = line.includes(":") ? line.split(":")[1].trim() : "";
       const cleanMeta = meta
@@ -89,18 +82,18 @@ function sanitizeMermaidCode(raw: string): string {
 
     if (sections.length > 0) {
       let flow = "flowchart TD\n";
-      flow += `  header["📅 ${curTitle.replace(/[\"\n]/g, " ")}"]\n`;
+      flow += `  header["${curTitle.replace(/["\n]/g, " ")}"]\n`;
 
       let prevId = "header";
       let count = 0;
 
       sections.forEach((sec, sIdx) => {
         const secId = `sec_${sIdx}`;
-        flow += `  subgraph ${secId}["${sec.title.replace(/[\"\n]/g, " ")}"]\n`;
+        flow += `  subgraph ${secId}["${sec.title.replace(/["\n]/g, " ")}"]\n`;
         sec.items.forEach((item) => {
           count++;
           const nId = `n_${count}`;
-          const safeItem = item.replace(/[\"\n]/g, "'");
+          const safeItem = item.replace(/["\n]/g, "'");
           flow += `    ${nId}["${safeItem}"]\n`;
         });
         flow += "  end\n";
@@ -113,7 +106,7 @@ function sanitizeMermaidCode(raw: string): string {
   }
 
   // Auto-quote unquoted labels with parentheses or special chars in flowchart:
-  code = code.replace(/\[([^\"\]\n]+)\]/g, (match, inner) => {
+  code = code.replace(/\[([^"\]\n]+)\]/g, (match, inner) => {
     if (inner.includes("(") || inner.includes(")") || inner.includes(":") || inner.includes("&") || inner.includes("-")) {
       return `["${inner.replace(/"/g, "'")}"]`;
     }
@@ -134,7 +127,6 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
     const trimmed = code.trim();
     if (!trimmed) return;
 
-    // While streaming, do not attempt render on incomplete code
     if (isStreaming) {
       return;
     }
@@ -150,7 +142,6 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
           setRenderError(null);
         }
       } catch (err: unknown) {
-        // Remove any dirty elements inserted by mermaid on failure
         if (typeof document !== "undefined") {
           document.getElementById(id)?.remove();
           document.getElementById(`d${id}`)?.remove();
@@ -202,11 +193,10 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
     setTimeout(() => setCopied(false), 1500);
   };
 
-  // While streaming and not rendered yet, show a clean sleek placeholder without error
   if (isStreaming && !svgContent) {
     return (
-      <div className="my-4 border border-rose-100 bg-rose-50/50 rounded-xl p-4 flex items-center justify-center gap-2.5 text-xs text-slate-600 font-sans shadow-2xs">
-        <GitBranch className="w-4 h-4 text-[#E11D48] animate-pulse" />
+      <div className="my-4 border border-blue-100 bg-blue-50/50 rounded-xl p-4 flex items-center justify-center gap-2.5 text-xs text-slate-600 font-sans shadow-2xs">
+        <GitBranch className="size-4 text-[#0052FF] animate-pulse" />
         <span className="font-medium">Generating visual diagram...</span>
       </div>
     );
@@ -214,40 +204,42 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
 
   if (renderError) {
     return (
-      <div className="my-3 border border-slate-200 bg-slate-50 rounded-lg p-3 font-mono text-xs">
+      <div className="my-3 border border-slate-200 bg-slate-50 rounded-xl p-3.5 font-mono text-xs shadow-2xs">
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 text-slate-500">
-          <span className="flex items-center gap-1.5 font-sans font-medium text-[11px]">
-            <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-            Visual Diagram (Mermaid Source)
+          <span className="flex items-center gap-1.5 font-sans font-medium text-[11px] text-amber-700">
+            <AlertCircle className="size-3.5 text-amber-500" />
+            Visual Diagram Source
           </span>
           <button
             type="button"
             onClick={handleCopyCode}
-            className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-800 cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-900 cursor-pointer"
           >
-            {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+            {copied ? <Check className="size-3 text-emerald-600" /> : <Copy className="size-3" />}
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
-        <pre className="overflow-x-auto text-slate-700 whitespace-pre font-mono">{code}</pre>
+        <pre className="overflow-x-auto text-slate-700 whitespace-pre font-mono text-[11px] leading-relaxed">{code}</pre>
       </div>
     );
   }
 
   return (
-    <div className="my-4 border border-slate-200 bg-white rounded-xl shadow-2xs overflow-hidden">
+    <div className="my-4 border border-slate-200 bg-white rounded-xl shadow-xs overflow-hidden font-sans">
       {/* Diagram Header */}
-      <div className="px-3.5 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 font-sans">
-          <GitBranch className="w-3.5 h-3.5 text-[#E11D48]" />
-          <span>Workflow & Architecture Diagram</span>
+      <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+          <div className="size-5 rounded-md bg-blue-50 text-[#0052FF] flex items-center justify-center">
+            <GitBranch className="size-3.5" />
+          </div>
+          <span>Workflow &amp; Architecture Diagram</span>
         </div>
         <button
           type="button"
           onClick={handleCopyCode}
-          className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-sans text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 rounded-md transition-colors cursor-pointer"
         >
-          {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+          {copied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
           <span>{copied ? "Copied" : "Copy Source"}</span>
         </button>
       </div>
@@ -255,7 +247,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, isStreamin
       {/* SVG Container */}
       <div
         ref={containerRef}
-        className="p-4 overflow-x-auto flex items-center justify-center min-h-[140px] [&_svg]:max-w-full [&_svg]:h-auto"
+        className="p-5 overflow-x-auto flex items-center justify-center min-h-[140px] [&_svg]:max-w-full [&_svg]:h-auto"
         dangerouslySetInnerHTML={{ __html: svgContent }}
       />
     </div>
