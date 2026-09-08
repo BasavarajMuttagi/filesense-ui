@@ -22,7 +22,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onToggleSidebar,
 }) => {
   return (
-    <header className="h-12 w-full bg-[#FAF9F6]/90 backdrop-blur-md border-b border-[#16161310] sticky top-0 z-20 flex items-center justify-between px-4 font-sans select-none transition-colors">
+    <header className="h-12 w-full bg-[#FAF9F6]/40 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between px-4 font-sans select-none transition-colors">
       {/* Left: Mobile Menu Toggle + Clean Breadcrumb Navigation */}
       <div className="flex items-center gap-2.5 min-w-0">
         <button

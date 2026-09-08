@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SignUpButton } from "@clerk/clerk-react";
 import {
   Layers,
@@ -22,6 +22,15 @@ import { MermaidDiagram } from "../common/MermaidDiagram";
 export const LandingPage: React.FC = () => {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [copiedDemo, setCopiedDemo] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const sampleMermaid = `graph TD
     A[📄 Raw Documents] -->|Chunk & Tokenize| B(⚡ FastEmbed Engine)
@@ -64,9 +73,15 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen bg-[#FAF9F6] text-[#161613] font-sans selection:bg-[#E2DAFF] selection:text-[#161613]">
-      {/* 1. TOP NAVIGATION: Clean Header with only brand and Try button */}
-      <header className="sticky top-0 z-50 w-full bg-[#FAF9F6]/85 backdrop-blur-md border-b border-[#1616130d] transition-all">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      {/* 1. STICKY NAVIGATION: 100% transparent at top, frosted glass when scrolled */}
+      <header
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+          isScrolled
+            ? "bg-[#FAF9F6]/85 backdrop-blur-md shadow-2xs py-3 border-b border-[#16161308]"
+            : "bg-transparent py-4 border-b border-transparent"
+        }`}
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Brand Logo */}
           <a href="#" className="flex items-center gap-2.5 group">
             <div className="size-8 rounded-2xl bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
@@ -90,8 +105,8 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* 2. HERO SECTION: Document RAG Focus */}
-      <section className="relative pt-16 pb-20 sm:pt-24 sm:pb-28 px-4 sm:px-6 tiimo-aura-gradient overflow-hidden">
+      {/* 2. HERO SECTION: Seamlessly continuous behind top header */}
+      <section className="relative -mt-18 pt-24 pb-20 sm:pt-28 sm:pb-28 px-4 sm:px-6 tiimo-aura-gradient overflow-hidden">
         <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
           {/* Pill Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E2DAFF]/70 border border-[#7C5CFC33] mb-6 shadow-2xs animate-in fade-in slide-in-from-bottom-2 duration-300">
