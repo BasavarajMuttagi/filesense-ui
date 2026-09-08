@@ -1,6 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" fill="#111111" rx="0"/>
-  <rect x="6" y="14" width="20" height="4" fill="#E11D48"/>
-  <rect x="14" y="6" width="4" height="20" fill="#E11D48"/>
-  <rect x="14" y="14" width="4" height="4" fill="#FFFFFF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <!-- Soft Lavender Rounded Squircle Canvas -->
+  <rect width="32" height="32" rx="9" fill="#E2DAFF" />
+  
+  <!-- Subtle Hairline Border for high contrast in dark browser tabs -->
+  <rect x="0.5" y="0.5" width="31" height="31" rx="8.5" stroke="#7C5CFC" stroke-opacity="0.25" />
+
+  <!-- FileSense Layers Brand Icon in Signature Purple -->
+  <g stroke="#7C5CFC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top Layer Sheet with subtle pastel tint -->
+    <polygon points="16 5 26 10 16 15 6 10" fill="#7C5CFC" fill-opacity="0.18" />
+    
+    <!-- Middle Layer Sheet -->
+    <polyline points="6 15.5 16 20.5 26 15.5" />
+    
+    <!-- Bottom Layer Sheet -->
+    <polyline points="6 21 16 26 26 21" />
+  </g>
 </svg>
