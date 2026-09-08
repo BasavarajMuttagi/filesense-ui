@@ -15,7 +15,7 @@ export const ChatMarkdown: React.FC<ChatMarkdownProps> = React.memo(({
   isStreaming,
   onCitationClick,
 }) => {
-  // Pre-process inline citations like [1] or [1][2] into sleek bracketed citation badges (no circles)
+  // Pre-process inline citations like [1] or [1][2] into sleek text citations without padding or border
   const renderFormattedText = (text: string) => {
     const parts = text.split(/(\[\d+\])/g);
     if (parts.length === 1) return text;
@@ -30,7 +30,7 @@ export const ChatMarkdown: React.FC<ChatMarkdownProps> = React.memo(({
             key={i}
             type="button"
             onClick={() => onCitationClick?.(sourceIndex)}
-            className="inline-flex items-center font-mono text-[11px] font-semibold text-[#7C5CFC] bg-[#F1EDFF] hover:bg-[#E2DAFF] hover:text-[#5229EC] px-1.5 py-0.5 rounded-md border border-[#7C5CFC26] transition-all active:scale-95 cursor-pointer align-baseline mx-0.5 select-none"
+            className="inline font-mono text-xs font-medium text-[#7C5CFC] hover:text-[#5229EC] hover:underline cursor-pointer transition-colors align-baseline mx-0.5 select-none p-0 border-none bg-transparent"
             title={`View source citation [${citationNum}]`}
           >
             [{citationNum}]
@@ -119,12 +119,22 @@ export const ChatMarkdown: React.FC<ChatMarkdownProps> = React.memo(({
           ),
           td: ({ children }) => (
             <td className="px-4 py-3 border-t border-[#1616130d] text-[#161613d9]">
-              {children}
+              {React.Children.map(children, (child) => {
+                if (typeof child === "string") {
+                  return renderFormattedText(child);
+                }
+                return child;
+              })}
             </td>
           ),
           blockquote: ({ children }) => (
             <blockquote className="border-l-3 border-[#7C5CFC] pl-4 my-3 text-[#161613cc] italic bg-[#E2DAFF]/25 py-2.5 rounded-r-2xl">
-              {children}
+              {React.Children.map(children, (child) => {
+                if (typeof child === "string") {
+                  return renderFormattedText(child);
+                }
+                return child;
+              })}
             </blockquote>
           ),
           code({ className, children, ...props }) {

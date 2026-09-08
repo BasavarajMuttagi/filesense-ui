@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import type { DocumentItem, Project } from "../../types";
 import {
   FileText,
-  Download,
   Trash2,
   X,
   Code,
@@ -14,7 +13,6 @@ import {
   FolderOpen,
   Loader2,
   HardDrive,
-  Plus,
 } from "lucide-react";
 import { DocumentListSkeleton } from "../common/SwissSkeleton";
 
@@ -27,7 +25,6 @@ interface ArtifactsPanelProps {
   onDeleteDocument: (docId: string) => Promise<void>;
   onInspectDocument: (docItem: DocumentItem) => void;
   onOpenNewProjectModal: () => void;
-  onUploadFiles?: (files: File[]) => Promise<void>;
 }
 
 export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
@@ -39,28 +36,8 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
   onDeleteDocument,
   onInspectDocument,
   onOpenNewProjectModal,
-  onUploadFiles,
 }) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgressText, setUploadProgressText] = useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0 || !onUploadFiles) return;
-    setIsUploading(true);
-    setUploadProgressText(files.length > 1 ? `Uploading ${files.length} files...` : `Uploading ${files[0].name}...`);
-    try {
-      await onUploadFiles(files);
-    } finally {
-      setIsUploading(false);
-      setUploadProgressText(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  if (!isOpen) return null;
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return "0 B";
@@ -128,17 +105,21 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
     }
   };
 
-  const handleDownload = (doc: DocumentItem, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (doc.storageUrl) {
-      window.open(doc.storageUrl, "_blank");
-    } else {
-      onInspectDocument(doc);
-    }
-  };
-
   return (
-    <aside className="w-72 lg:w-80 h-screen bg-[#F8F7F3] border-l border-[#16161312] flex flex-col shrink-0 z-30 font-sans select-none">
+    <aside
+      aria-hidden={!isOpen}
+      className={`h-screen bg-[#F8F7F3] flex flex-col shrink-0 z-30 font-sans select-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        isOpen
+          ? "w-72 lg:w-80 border-l border-[#16161312] opacity-100"
+          : "w-0 border-l-0 border-transparent opacity-0 pointer-events-none"
+      }`}
+    >
+      {/* Fixed-width sliding inner container to prevent content squashing during transition */}
+      <div
+        className={`w-72 lg:w-80 h-full flex flex-col shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isOpen ? "translate-x-0" : "translate-x-8"
+        }`}
+      >
       {/* Panel Header */}
       <div className="h-12 px-4 flex items-center justify-between border-b border-[#16161310] bg-[#F8F7F3]">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -146,37 +127,16 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
           <h3 className="font-serif font-bold text-sm text-[#161613] shrink-0">
             Files
           </h3>
-          {isUploading && (
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-[#7C5CFC] bg-[#E2DAFF]/60 px-2 py-0.5 rounded-full truncate">
-              <Loader2 className="size-3 animate-spin shrink-0" />
-              <span className="truncate">{uploadProgressText}</span>
-            </span>
-          )}
         </div>
 
-        <div className="flex items-center gap-1">
-          {activeProject && onUploadFiles && (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              aria-label="Upload files"
-              title="Upload files"
-              className="size-7 flex items-center justify-center rounded-full text-[#16161380] hover:bg-[#1616130d] hover:text-[#161613] transition-colors cursor-pointer disabled:opacity-50"
-            >
-              <Plus className="size-4" />
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close panel"
-            className="size-7 flex items-center justify-center rounded-full text-[#16161380] hover:bg-[#1616130d] hover:text-[#161613] transition-colors cursor-pointer"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close panel"
+          className="size-7 flex items-center justify-center rounded-full text-[#16161380] hover:bg-[#1616130d] hover:text-[#161613] transition-colors cursor-pointer"
+        >
+          <X className="size-4" />
+        </button>
       </div>
 
       {/* Main Files List */}
@@ -203,29 +163,9 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
             <h4 className="font-serif text-sm font-semibold text-[#161613] mb-1">
               No files in this project
             </h4>
-            <p className="text-xs text-[#16161380] max-w-xs leading-relaxed mb-3">
-              Attach files from chat or upload them here.
+            <p className="text-xs text-[#16161380] max-w-xs leading-relaxed">
+              Click Attach in chat to upload and index documents.
             </p>
-            {activeProject && onUploadFiles && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="px-4 py-2 text-xs font-semibold rounded-full bg-[#161613] text-white hover:bg-[#282824] transition-all cursor-pointer shadow-xs flex items-center gap-1.5 disabled:opacity-50"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="size-3.5 animate-spin text-white" />
-                    <span>Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus className="size-3.5 stroke-[2.5]" />
-                    <span>Upload Files</span>
-                  </>
-                )}
-              </button>
-            )}
           </div>
         ) : (
           documents.map((doc) => (
@@ -267,16 +207,6 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
 
                 {/* Hover Action Buttons */}
                 <div className="hidden group-hover:flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={(e) => handleDownload(doc, e)}
-                    aria-label="Download file"
-                    title="Download / Open file"
-                    className="size-6.5 flex items-center justify-center rounded-full text-[#16161380] hover:text-[#161613] hover:bg-[#1616130d] transition-colors cursor-pointer"
-                  >
-                    <Download className="size-3.5" />
-                  </button>
-
                   <button
                     type="button"
                     onClick={(e) => {
@@ -322,16 +252,7 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
           Ready
         </span>
       </div>
-
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        className="hidden"
-        onChange={handleFileChange}
-        accept=".pdf,.txt,.docx,.png,.jpg,.jpeg"
-      />
+      </div>
     </aside>
   );
 };

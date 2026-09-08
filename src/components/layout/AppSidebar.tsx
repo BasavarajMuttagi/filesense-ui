@@ -54,75 +54,54 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const visibleProjects = showAllProjects ? projects : projects.slice(0, 6);
   const visibleSessions = showAllSessions ? sessions : sessions.slice(0, 8);
 
-  if (collapsed) {
-    return (
-      <aside className="w-13 h-screen bg-[#F8F7F3] border-r border-[#16161312] flex flex-col items-center py-3 shrink-0 z-30 font-sans select-none">
-        {/* Brand Mark */}
-        <div className="size-8 bg-[#E2DAFF] text-[#7C5CFC] rounded-2xl flex items-center justify-center mb-3 shrink-0 shadow-2xs">
-          <Layers className="size-4" />
-        </div>
-
-        {/* Quick New Chat Button */}
-        {activeProject && (
-          <button
-            type="button"
-            onClick={onNewChat}
-            aria-label="New thread"
-            title="New thread"
-            className="size-8 flex items-center justify-center rounded-full bg-[#161613] text-white hover:bg-[#282824] transition-transform active:scale-95 shadow-xs mb-3 cursor-pointer"
-          >
-            <Plus className="size-4" />
-          </button>
-        )}
-
-        {/* Projects Icons */}
-        <div className="flex-1 w-full flex flex-col items-center gap-1.5 overflow-y-auto px-1.5 scrollbar-none">
-          {loadingProjects ? (
-            <div className="flex flex-col items-center gap-2 w-full">
-              <div className="size-8 rounded-2xl bg-[#EFECE6] animate-shimmer" />
-              <div className="size-8 rounded-2xl bg-[#EFECE6] animate-shimmer" />
-              <div className="size-8 rounded-2xl bg-[#EFECE6] animate-shimmer" />
-            </div>
-          ) : (
-            projects.map((p) => {
-              const isActive = p.id === activeProject?.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => onSelectProject(p.id)}
-                  title={p.title}
-                  className={`size-8 flex items-center justify-center rounded-2xl text-xs font-semibold transition-all cursor-pointer ${isActive
-                      ? "bg-[#7C5CFC] text-white shadow-xs"
-                      : "text-[#16161399] hover:bg-[#1616130d] hover:text-[#161613]"
-                    }`}
-                >
-                  {p.title.charAt(0).toUpperCase()}
-                </button>
-              );
-            })
-          )}
-        </div>
-
-        {/* Expand Trigger */}
+  return (
+    <aside
+      className={`relative h-screen bg-[#F8F7F3] border-r border-[#16161312] flex flex-col shrink-0 z-30 font-sans select-none overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        collapsed ? "w-13" : "w-64"
+      }`}
+    >
+      {/* 1. Collapsed View: Fixed width w-13, ONLY logo and expand icon, nothing else */}
+      <div
+        className={`absolute inset-y-0 left-0 w-13 h-full flex flex-col items-center justify-between py-3 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          collapsed
+            ? "opacity-100 visible pointer-events-auto translate-x-0"
+            : "opacity-0 invisible pointer-events-none -translate-x-3"
+        }`}
+      >
+        {/* Brand Logo */}
         <button
           type="button"
           onClick={onToggleCollapse}
           aria-label="Expand sidebar"
           title="Expand sidebar"
-          className="mt-auto size-8 flex items-center justify-center rounded-full text-[#16161380] hover:bg-[#1616130d] hover:text-[#161613] transition-colors cursor-pointer"
+          className="size-8 bg-[#E2DAFF] text-[#7C5CFC] rounded-2xl flex items-center justify-center shrink-0 shadow-2xs cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+        >
+          <Layers className="size-4" />
+        </button>
+
+        {/* Expand Icon */}
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          aria-label="Expand sidebar"
+          title="Expand sidebar"
+          className="size-8 flex items-center justify-center rounded-full text-[#16161380] hover:bg-[#1616130d] hover:text-[#161613] transition-colors cursor-pointer"
         >
           <ChevronRight className="size-4" />
         </button>
-      </aside>
-    );
-  }
+      </div>
 
-  return (
-    <aside className="w-64 h-screen bg-[#F8F7F3] border-r border-[#16161312] flex flex-col shrink-0 z-30 font-sans select-none">
-      {/* Top Header Section */}
-      <div className="h-12 px-3.5 border-b border-[#16161310] flex items-center justify-between">
-        <div className="flex items-center gap-2.5 min-w-0">
+      {/* 2. Expanded View: Fixed width w-64, slides and fades smoothly */}
+      <div
+        className={`w-64 h-full flex flex-col shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          collapsed
+            ? "opacity-0 invisible pointer-events-none -translate-x-6"
+            : "opacity-100 visible pointer-events-auto translate-x-0"
+        }`}
+      >
+        {/* Top Header Section */}
+        <div className="h-12 px-3.5 border-b border-[#16161310] flex items-center justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
           <div className="size-7 rounded-xl bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center shrink-0 shadow-2xs">
             <Layers className="size-4" />
           </div>
@@ -347,6 +326,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             </button>
           </SignInButton>
         </SignedOut>
+      </div>
       </div>
     </aside>
   );

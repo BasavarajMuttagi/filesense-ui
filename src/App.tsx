@@ -3,7 +3,6 @@ import { useAuth } from "@clerk/clerk-react";
 import { registerAuthTokenGetter } from "./api/client";
 import { getProjects, deleteProject } from "./api/projects";
 import { getDocumentsByProject, deleteDocument } from "./api/documents";
-import { uploadFile } from "./api/upload";
 import { listQueries, listSessions } from "./api/queries";
 import type { Project, DocumentItem, QueryRecord, ChatSession } from "./types";
 
@@ -216,28 +215,6 @@ export function App() {
     setTimeout(() => selectedProjectId && fetchDocuments(selectedProjectId), 2500);
   }, [selectedProjectId, fetchDocuments]);
 
-  // Handle batch file uploads from ArtifactsPanel
-  const handleUploadFiles = useCallback(
-    async (files: File[]) => {
-      if (!selectedProjectId || files.length === 0) return;
-
-      for (const file of files) {
-        try {
-          const token = await getToken();
-          await uploadFile({ projectId: selectedProjectId, file, token });
-          fetchDocuments(selectedProjectId);
-        } catch (err) {
-          console.error(`Failed to upload ${file.name}:`, err);
-        }
-      }
-
-      fetchDocuments(selectedProjectId);
-      setTimeout(() => selectedProjectId && fetchDocuments(selectedProjectId), 800);
-      setTimeout(() => selectedProjectId && fetchDocuments(selectedProjectId), 2500);
-    },
-    [selectedProjectId, getToken, fetchDocuments]
-  );
-
   // Handlers
   const handleProjectCreated = (newProject: Project) => {
     setProjects((prev) => [newProject, ...prev]);
@@ -380,7 +357,6 @@ export function App() {
         onDeleteDocument={handleDeleteDocument}
         onInspectDocument={(doc) => setInspectingDocument(doc)}
         onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
-        onUploadFiles={handleUploadFiles}
       />
 
       {/* 4. Modals */}

@@ -34,16 +34,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <Menu className="size-4" />
         </button>
 
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0 text-xs">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0 text-xs font-sans">
           {!activeProject ? (
-            <span className="font-medium text-[#16161380] truncate">
+            <span className="text-[#16161366] font-normal truncate">
               No project selected
             </span>
           ) : (
             <>
               {/* Project Crumb */}
-              <div className="flex items-center gap-1.5 text-[#16161399] shrink-0 font-medium">
-                <Folder className="size-3.5 text-[#7C5CFC]" />
+              <div className="flex items-center gap-1.5 text-[#16161380] shrink-0 font-normal">
+                <Folder className="size-3.5 text-[#7C5CFC]/80" />
                 <span
                   className="truncate max-w-[120px] sm:max-w-[180px]"
                   title={activeProject.title}
@@ -53,22 +53,22 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </div>
 
               {/* Separator */}
-              <ChevronRight className="size-3 text-[#16161333] shrink-0" />
+              <ChevronRight className="size-3 text-[#16161326] shrink-0" />
 
-              {/* Active Thread Crumb */}
-              <div className="flex items-center gap-1.5 min-w-0 text-[#161613] font-serif font-semibold text-sm">
+              {/* Active Thread Crumb with Light Emphasis */}
+              <div className="flex items-center gap-1.5 min-w-0">
                 {activeSession ? (
-                  <>
-                    <MessageSquare className="size-3.5 text-[#7C5CFC] shrink-0" />
+                  <div className="flex items-center gap-1.5 min-w-0 px-2 py-0.5 rounded-md bg-[#16161306] border border-[#1616130a] text-[#161613] font-medium">
+                    <MessageSquare className="size-3 text-[#7C5CFC] shrink-0" />
                     <span
                       className="truncate max-w-[180px] sm:max-w-[360px]"
                       title={activeSession.title}
                     >
                       {activeSession.title}
                     </span>
-                  </>
+                  </div>
                 ) : (
-                  <span className="italic text-[#161613b3]">New thread</span>
+                  <span className="text-[#16161366] font-normal">New thread</span>
                 )}
               </div>
             </>
