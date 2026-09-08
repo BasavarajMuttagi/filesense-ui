@@ -4,13 +4,13 @@ import remarkGfm from "remark-gfm";
 import { MermaidDiagram } from "../common/MermaidDiagram";
 import { Copy, Check } from "lucide-react";
 
-interface PerplexityMarkdownProps {
+interface ChatMarkdownProps {
   content: string;
   isStreaming?: boolean;
   onCitationClick?: (index: number) => void;
 }
 
-export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = React.memo(({
+export const ChatMarkdown: React.FC<ChatMarkdownProps> = React.memo(({
   content,
   isStreaming,
   onCitationClick,
@@ -42,7 +42,7 @@ export const PerplexityMarkdown: React.FC<PerplexityMarkdownProps> = React.memo(
   };
 
   return (
-    <div className="perplexity-markdown text-sm text-slate-800 leading-relaxed font-sans space-y-3.5">
+    <div className="chat-markdown text-sm text-slate-800 leading-relaxed font-sans space-y-3.5">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{

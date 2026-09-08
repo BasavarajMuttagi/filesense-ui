@@ -2,6 +2,22 @@ import React, { useState } from "react";
 import type { SourceItem } from "../../types";
 import { FileText, Copy, Check, ChevronRight, X } from "lucide-react";
 
+// Normalize raw scores: converts Upstash Hybrid RRF scores (range 0.005-0.033) or cosine scores (0-1) into human-intuitive 0-100%
+export function formatMatchScore(rawScore: number | undefined): number {
+  if (!rawScore || rawScore <= 0) return 0;
+  if (rawScore >= 0.20) return Math.min(100, Math.round(rawScore * 100));
+
+  const maxRrf = 2 / 61; // ≈ 0.0328 (top rank in both dense and sparse)
+  const singleRank1 = 1 / 61; // ≈ 0.0164 (top rank in one modality)
+
+  if (rawScore >= singleRank1) {
+    const ratio = Math.min(1, (rawScore - singleRank1) / (maxRrf - singleRank1));
+    return Math.round(80 + ratio * 18);
+  }
+  const ratio = Math.max(0, rawScore / singleRank1);
+  return Math.round(60 + ratio * 20);
+}
+
 interface SourceChipsProps {
   sources: SourceItem[];
   selectedSourceIndex?: number | null;
@@ -54,7 +70,7 @@ export const SourceChips: React.FC<SourceChipsProps> = ({
       {/* Swiss Compact Citation Cards Reel */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-thin">
         {sources.slice(0, 6).map((src, idx) => {
-          const scorePct = Math.round((src.score || 0) * 100);
+          const scorePct = formatMatchScore(src.score);
           const pageStr = src.pageStart ? `p. ${src.pageStart}` : null;
 
           return (
@@ -147,7 +163,7 @@ export const SourceChips: React.FC<SourceChipsProps> = ({
                   <span>Chunk {activeSource.chunkIndex ?? 0}</span>
                 )}
                 <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-semibold">
-                  Semantic Score: {Math.round((activeSource.score || 0) * 100)}%
+                  Semantic Score: {formatMatchScore(activeSource.score)}%
                 </span>
               </div>
 

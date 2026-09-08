@@ -19,7 +19,7 @@ export const ResponseSkeleton: React.FC = () => {
       {/* Status indicator */}
       <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
         <div className="size-2 rounded-full bg-[#0052FF] animate-ping" />
-        <span className="text-slate-600 font-medium">Searching corpus &amp; synthesizing...</span>
+        <span className="text-slate-600 font-medium">Searching documents &amp; synthesizing...</span>
       </div>
 
       {/* Subtle compact placeholder line */}
@@ -68,3 +68,58 @@ export const SidebarNavSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) 
     </div>
   );
 };
+
+export const ChatThreadSkeleton: React.FC = () => {
+  return (
+    <div className="max-w-3xl mx-auto w-full flex flex-col gap-8 py-2">
+      {/* Turn 1: User question + Grounded sources + Assistant markdown response */}
+      <div className="flex flex-col gap-3.5">
+        {/* User Question Bubble */}
+        <div className="flex justify-end w-full">
+          <div className="max-w-[75%] sm:max-w-[60%] w-full flex justify-end">
+            <Skeleton className="h-10 w-64 rounded-2xl rounded-tr-xs" />
+          </div>
+        </div>
+
+        {/* Grounded Citation Chips */}
+        <div className="flex items-center gap-2 pt-0.5">
+          <Skeleton className="h-7 w-28 rounded-lg" />
+          <Skeleton className="h-7 w-32 rounded-lg" />
+          <Skeleton className="h-7 w-24 rounded-lg" />
+        </div>
+
+        {/* Assistant Response Paragraphs */}
+        <div className="flex flex-col gap-2.5 pt-1">
+          <Skeleton className="h-4 w-full rounded" />
+          <Skeleton className="h-4 w-[92%] rounded" />
+          <Skeleton className="h-4 w-[78%] rounded" />
+          <Skeleton className="h-4 w-[85%] rounded" />
+        </div>
+      </div>
+
+      {/* Turn 2: Follow-up Turn */}
+      <div className="flex flex-col gap-3.5 pt-4 border-t border-slate-100">
+        {/* User Question Bubble */}
+        <div className="flex justify-end w-full">
+          <div className="max-w-[75%] sm:max-w-[50%] w-full flex justify-end">
+            <Skeleton className="h-10 w-48 rounded-2xl rounded-tr-xs" />
+          </div>
+        </div>
+
+        {/* Grounded Citation Chips */}
+        <div className="flex items-center gap-2 pt-0.5">
+          <Skeleton className="h-7 w-36 rounded-lg" />
+          <Skeleton className="h-7 w-28 rounded-lg" />
+        </div>
+
+        {/* Assistant Response Paragraphs */}
+        <div className="flex flex-col gap-2.5 pt-1">
+          <Skeleton className="h-4 w-full rounded" />
+          <Skeleton className="h-4 w-[88%] rounded" />
+          <Skeleton className="h-4 w-[68%] rounded" />
+        </div>
+      </div>
+    </div>
+  );
+};
+

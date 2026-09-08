@@ -1,6 +1,6 @@
 import React from "react";
 import type { Project, ChatSession } from "../../types";
-import { PanelRight, Menu } from "lucide-react";
+import { PanelRight, Menu, Folder, ChevronRight, MessageSquare } from "lucide-react";
 
 interface AppHeaderProps {
   projects: Project[];
@@ -15,6 +15,7 @@ interface AppHeaderProps {
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
+  activeProject,
   activeSession,
   artifactsPanelOpen,
   onToggleArtifactsPanel,
@@ -22,8 +23,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   return (
     <header className="h-11 w-full bg-white border-b border-slate-200/80 sticky top-0 z-20 flex items-center justify-between px-4 font-sans select-none">
-      {/* Left: Mobile Menu Toggle + Linear-style Clean Title */}
-      <div className="flex items-center gap-2.5 min-w-0">
+      {/* Left: Mobile Menu Toggle + Clean Breadcrumb Navigation */}
+      <div className="flex items-center gap-2 min-w-0">
         <button
           type="button"
           onClick={onToggleSidebar}
@@ -33,9 +34,46 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <Menu className="size-4" />
         </button>
 
-        <h1 className="text-xs font-semibold text-slate-900 truncate max-w-[280px] sm:max-w-[480px]">
-          {activeSession ? activeSession.title : "New thread"}
-        </h1>
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 min-w-0 text-xs">
+          {!activeProject ? (
+            <span className="font-medium text-slate-500 truncate">
+              No project selected
+            </span>
+          ) : (
+            <>
+              {/* Project Crumb */}
+              <div className="flex items-center gap-1.5 text-slate-600 shrink-0">
+                <Folder className="size-3.5 text-slate-400" />
+                <span
+                  className="font-medium text-slate-700 truncate max-w-[130px] sm:max-w-[200px]"
+                  title={activeProject.title}
+                >
+                  {activeProject.title}
+                </span>
+              </div>
+
+              {/* Separator */}
+              <ChevronRight className="size-3 text-slate-300 shrink-0" />
+
+              {/* Active Thread Crumb */}
+              <div className="flex items-center gap-1.5 min-w-0 text-slate-900 font-semibold">
+                {activeSession ? (
+                  <>
+                    <MessageSquare className="size-3 text-slate-400 shrink-0" />
+                    <span
+                      className="truncate max-w-[180px] sm:max-w-[360px]"
+                      title={activeSession.title}
+                    >
+                      {activeSession.title}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-slate-800">New thread</span>
+                )}
+              </div>
+            </>
+          )}
+        </nav>
       </div>
 
       {/* Right: Files Side Panel Toggle without count or profile */}

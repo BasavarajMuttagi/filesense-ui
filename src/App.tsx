@@ -8,7 +8,7 @@ import type { Project, DocumentItem, QueryRecord, ChatSession } from "./types";
 
 import { AppSidebar } from "./components/layout/AppSidebar";
 import { AppHeader } from "./components/layout/AppHeader";
-import { PerplexityChat } from "./components/chat/PerplexityChat";
+import { ChatView } from "./components/chat/ChatView";
 import { ArtifactsPanel } from "./components/documents/ArtifactsPanel";
 import { DocumentInspector } from "./components/documents/DocumentInspector";
 import { NewProjectModal } from "./components/chat/NewProjectModal";
@@ -33,6 +33,7 @@ export function App() {
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(false);
+  const [loadingQueries, setLoadingQueries] = useState(false);
 
   // Modals
   const [newProjectModalOpen, setNewProjectModalOpen] = useState(false);
@@ -82,11 +83,14 @@ export function App() {
       setQueries([]);
       return;
     }
+    setLoadingQueries(true);
     try {
       const res = await listQueries(projectId, { sessionId, limit: 30 });
       setQueries(res.queries);
     } catch (err) {
       console.error("Failed to load session queries:", err);
+    } finally {
+      setLoadingQueries(false);
     }
   }, []);
 
@@ -126,6 +130,7 @@ export function App() {
       if (!selectedProjectId) {
         setLoadingDocuments(false);
         setLoadingSessions(false);
+        setLoadingQueries(false);
         return;
       }
       setLoadingDocuments(true);
@@ -141,11 +146,17 @@ export function App() {
         if (sess.length > 0) {
           const firstSessionId = sess[0].sessionId;
           setActiveSessionId(firstSessionId);
-          const qsRes = await listQueries(selectedProjectId, { sessionId: firstSessionId, limit: 30 });
-          if (active) setQueries(qsRes.queries);
+          setLoadingQueries(true);
+          try {
+            const qsRes = await listQueries(selectedProjectId, { sessionId: firstSessionId, limit: 30 });
+            if (active) setQueries(qsRes.queries);
+          } finally {
+            if (active) setLoadingQueries(false);
+          }
         } else {
           setActiveSessionId(null);
           setQueries([]);
+          setLoadingQueries(false);
         }
       } catch (err) {
         console.error("Failed to load project details:", err);
@@ -165,10 +176,10 @@ export function App() {
 
   // Handle switching active chat session
   const handleSelectSession = useCallback(async (sessionId: string) => {
-    if (!selectedProjectId) return;
+    if (!selectedProjectId || sessionId === activeSessionId) return;
     setActiveSessionId(sessionId);
     await fetchSessionQueries(selectedProjectId, sessionId);
-  }, [selectedProjectId, fetchSessionQueries]);
+  }, [selectedProjectId, activeSessionId, fetchSessionQueries]);
 
   // Auto-polling when documents are in "processing" or "created" state
   useEffect(() => {
@@ -220,6 +231,7 @@ export function App() {
   const handleNewChat = () => {
     setActiveSessionId(null);
     setQueries([]);
+    setLoadingQueries(false);
     setChatKey((k) => k + 1);
   };
 
@@ -232,9 +244,11 @@ export function App() {
         {
           sessionId,
           title: firstQuestion,
+          firstQuestion,
+          queryCount: 1,
+          messageCount: 1,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          messageCount: 1,
         },
         ...prev,
       ];
@@ -245,8 +259,8 @@ export function App() {
   const activeSession = sessions.find((s) => s.sessionId === activeSessionId) || null;
 
   return (
-    <div className="h-screen w-screen flex bg-[#F8FAFC] text-slate-900 font-sans overflow-hidden">
-      {/* 1. Left Swiss Navigation Sidebar */}
+    <div className="flex h-screen w-screen bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans selection:bg-[#0052FF]/15 selection:text-[#0052FF]">
+      {/* 1. Left Column: App Sidebar Navigation */}
       <AppSidebar
         projects={projects}
         activeProject={activeProject}
@@ -263,9 +277,8 @@ export function App() {
         onSelectSession={handleSelectSession}
       />
 
-      {/* 2. Center Column: Swiss Header & Main Query Stream */}
-      <div className="flex-1 flex flex-col h-full min-w-0 bg-[#F8FAFC]">
-        {/* Top Header */}
+      {/* 2. Middle Column: Main Header & Central RAG Stream Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <AppHeader
           projects={projects}
           activeProject={activeProject}
@@ -280,9 +293,12 @@ export function App() {
 
         {/* Central Chat Stream */}
         <main className="flex-1 flex flex-col overflow-hidden relative min-h-0">
-          <PerplexityChat
+          <ChatView
             key={`${selectedProjectId || "default"}-${chatKey}`}
             activeProject={activeProject}
+            projects={projects}
+            loadingProjects={loadingProjects}
+            onSelectProject={(id) => setSelectedProjectId(id)}
             activeSessionId={activeSessionId}
             documentCount={documents.length}
             onDocumentUploaded={() => selectedProjectId && fetchDocuments(selectedProjectId)}
@@ -290,6 +306,7 @@ export function App() {
             onSessionCreated={handleSessionCreated}
             onNewChat={handleNewChat}
             initialHistory={queries}
+            loadingHistory={loadingQueries}
           />
         </main>
       </div>

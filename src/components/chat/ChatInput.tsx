@@ -182,11 +182,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <span>Attach</span>
             </button>
 
-            {activeProject && (
-              <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
-                Indexed to {activeProject.title}
-              </span>
-            )}
+
           </div>
 
           {/* Right: Send Message Button */}

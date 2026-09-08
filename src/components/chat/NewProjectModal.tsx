@@ -97,7 +97,7 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
               id="project-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Scope, corpus context, or technical notes..."
+              placeholder="Scope, project context, or technical notes..."
               rows={3}
               className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0052FF] focus:ring-2 focus:ring-[#0052FF]/15 resize-none transition-all"
             />

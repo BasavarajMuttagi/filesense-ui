@@ -155,7 +155,7 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
               onClick={onOpenNewProjectModal}
               className="px-3 py-1.5 text-xs font-semibold rounded-md bg-slate-900 text-white hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              Select Project
+              + Create Project
             </button>
           </div>
         ) : documents.length === 0 ? (
@@ -256,7 +256,7 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
       <div className="h-9 px-3 border-t border-slate-200/80 bg-white text-[10px] text-slate-400 flex items-center justify-between font-mono">
         <span className="flex items-center gap-1.5">
           <HardDrive className="size-3 text-slate-400" />
-          Tigris Storage
+          Document Storage
         </span>
         <span className="text-slate-500 font-semibold">
           Ready

@@ -63,15 +63,17 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         </div>
 
         {/* Quick New Chat Button */}
-        <button
-          type="button"
-          onClick={onNewChat}
-          aria-label="New thread"
-          title="New thread"
-          className="size-7 flex items-center justify-center rounded-md bg-blue-50 text-[#0052FF] hover:bg-blue-100 transition-colors border border-blue-200/60 mb-3 cursor-pointer"
-        >
-          <Plus className="size-3.5" />
-        </button>
+        {activeProject && (
+          <button
+            type="button"
+            onClick={onNewChat}
+            aria-label="New thread"
+            title="New thread"
+            className="size-7 flex items-center justify-center rounded-md bg-blue-50 text-[#0052FF] hover:bg-blue-100 transition-colors border border-blue-200/60 mb-3 cursor-pointer"
+          >
+            <Plus className="size-3.5" />
+          </button>
+        )}
 
         {/* Projects Icons */}
         <div className="flex-1 w-full flex flex-col items-center gap-1.5 overflow-y-auto px-1 scrollbar-none">
@@ -142,16 +144,18 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       </div>
 
       {/* New Chat Primary Action */}
-      <div className="p-2.5 pb-1">
-        <button
-          type="button"
-          onClick={onNewChat}
-          className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-semibold bg-[#0052FF] hover:bg-[#0045D8] text-white rounded-md shadow-xs transition-all cursor-pointer"
-        >
-          <Plus className="size-3.5" />
-          <span>New Thread</span>
-        </button>
-      </div>
+      {activeProject && (
+        <div className="p-2.5 pb-1">
+          <button
+            type="button"
+            onClick={onNewChat}
+            className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-semibold bg-[#0052FF] hover:bg-[#0045D8] text-white rounded-md shadow-xs transition-all cursor-pointer"
+          >
+            <Plus className="size-3.5" />
+            <span>New Thread</span>
+          </button>
+        </div>
+      )}
 
       {/* Navigation Scroll Area */}
       <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-5">
@@ -267,16 +271,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   sessionsExpanded ? "" : "-rotate-90"
                 }`}
               />
-            </button>
-
-            <button
-              type="button"
-              onClick={onNewChat}
-              aria-label="New thread"
-              title="New thread"
-              className="size-4.5 flex items-center justify-center rounded text-slate-400 hover:bg-slate-200/70 hover:text-slate-800 transition-colors cursor-pointer"
-            >
-              <Plus className="size-3" />
             </button>
           </div>
 

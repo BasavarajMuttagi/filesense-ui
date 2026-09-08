@@ -3,8 +3,8 @@ import type { Project, QueryRecord, SourceItem } from "../../types";
 import { submitQueryStream, listQueries } from "../../api/queries";
 import { ChatInput } from "./ChatInput";
 import { SourceChips } from "./SourceChips";
-import { PerplexityMarkdown } from "./PerplexityMarkdown";
-import { ResponseSkeleton } from "../common/SwissSkeleton";
+import { ChatMarkdown } from "./ChatMarkdown";
+import { ResponseSkeleton, ChatThreadSkeleton } from "../common/SwissSkeleton";
 import {
   Layers,
   Copy,
@@ -17,10 +17,17 @@ import {
   FileSearch,
   Cpu,
   BookOpen,
+  FolderPlus,
+  Folder,
+  Plus,
+  ArrowRight,
 } from "lucide-react";
 
-interface PerplexityChatProps {
+interface ChatViewProps {
   activeProject: Project | null;
+  projects?: Project[];
+  loadingProjects?: boolean;
+  onSelectProject?: (projectId: string) => void;
   activeSessionId: string | null;
   documentCount?: number;
   onDocumentUploaded: () => void;
@@ -28,6 +35,7 @@ interface PerplexityChatProps {
   onSessionCreated?: (sessionId: string, firstQuestion: string) => void;
   onNewChat?: () => void;
   initialHistory?: QueryRecord[];
+  loadingHistory?: boolean;
 }
 
 interface ChatMessage {
@@ -92,7 +100,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = React.memo(
           <div className="flex flex-col gap-2 py-1">
             {/* Markdown Answer Rendering */}
             <div className="relative leading-relaxed">
-              <PerplexityMarkdown
+              <ChatMarkdown
                 content={msg.answer || ""}
                 isStreaming={msg.streaming}
                 onCitationClick={onCitationClick}
@@ -142,13 +150,18 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = React.memo(
   }
 );
 
-export const PerplexityChat: React.FC<PerplexityChatProps> = ({
+export const ChatView: React.FC<ChatViewProps> = ({
   activeProject,
+  projects = [],
+  loadingProjects = false,
+  onSelectProject,
   activeSessionId,
+  documentCount = 0,
   onDocumentUploaded,
   onOpenNewProjectModal,
   onSessionCreated,
   initialHistory = [],
+  loadingHistory = false,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     initialHistory && initialHistory.length > 0
@@ -169,6 +182,7 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
   const [showScrollBottom, setShowScrollBottom] = useState<boolean>(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const currentStreamingSessionIdRef = useRef<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isFollowingStreamRef = useRef<boolean>(true);
   const pendingScrollToMsgIdRef = useRef<string | null>(null);
@@ -258,6 +272,16 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
 
   // Reset scroll to bottom only on project or session switch
   useEffect(() => {
+    // Only abort if user navigated away to a genuinely different session during streaming
+    if (
+      abortControllerRef.current &&
+      currentStreamingSessionIdRef.current &&
+      activeSessionId !== currentStreamingSessionIdRef.current
+    ) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      currentStreamingSessionIdRef.current = null;
+    }
     isFollowingStreamRef.current = true;
     scrollToBottom();
   }, [activeSessionId, activeProject?.id, scrollToBottom]);
@@ -323,6 +347,7 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
     tokenBufferRef.current = "";
     activeStreamingIdRef.current = null;
     isFollowingStreamRef.current = false;
+    currentStreamingSessionIdRef.current = null;
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -383,6 +408,7 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
+    currentStreamingSessionIdRef.current = currentSessionId;
 
     try {
       await submitQueryStream({
@@ -476,6 +502,13 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
             : msg
         )
       );
+    } finally {
+      if (currentStreamingSessionIdRef.current === currentSessionId) {
+        currentStreamingSessionIdRef.current = null;
+      }
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -499,8 +532,88 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col font-sans relative bg-[#F8FAFC]">
-      {/* 1. ZERO STATE: When no questions have been asked yet */}
-      {messages.length === 0 ? (
+      {!activeProject ? (
+        loadingProjects ? (
+          <div className="flex-1 flex items-center justify-center p-8 font-sans">
+            <div className="flex flex-col items-center gap-3 text-slate-400">
+              <Loader2 className="size-6 animate-spin text-[#0052FF]" />
+              <span className="text-xs font-medium">Loading workspace...</span>
+            </div>
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto font-sans animate-in fade-in duration-300">
+            <div className="size-14 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center mb-4">
+              <FolderPlus className="size-7 text-[#0052FF]" />
+            </div>
+            <h2 className="text-base font-bold text-slate-900 tracking-tight mb-1.5">
+              No projects yet
+            </h2>
+            <p className="text-xs text-slate-500 leading-relaxed mb-6 max-w-sm">
+              Create your first project to organize documents and query them with neural search.
+            </p>
+            <button
+              type="button"
+              onClick={onOpenNewProjectModal}
+              className="flex items-center gap-2 px-4 py-2 bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-semibold rounded-lg shadow-xs transition-all cursor-pointer"
+            >
+              <Plus className="size-3.5" />
+              <span>Create Project</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto font-sans animate-in fade-in duration-300">
+            <div className="size-14 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center mb-4">
+              <Folder className="size-7 text-[#0052FF]" />
+            </div>
+            <h2 className="text-base font-bold text-slate-900 tracking-tight mb-1.5">
+              No project selected
+            </h2>
+            <p className="text-xs text-slate-500 leading-relaxed mb-6 max-w-sm">
+              Select a project from the sidebar to view documents and start a conversation, or create a new one.
+            </p>
+            <div className="flex items-center gap-2.5">
+              {projects.length > 0 && onSelectProject && (
+                <button
+                  type="button"
+                  onClick={() => onSelectProject(projects[0].id)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-[#0052FF] hover:bg-[#0045D8] text-white text-xs font-semibold rounded-lg shadow-xs transition-all cursor-pointer"
+                >
+                  <span>Open &ldquo;{projects[0].title}&rdquo;</span>
+                  <ArrowRight className="size-3" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onOpenNewProjectModal}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold rounded-lg shadow-2xs transition-all cursor-pointer"
+              >
+                <Plus className="size-3.5" />
+                <span>New Project</span>
+              </button>
+            </div>
+          </div>
+        )
+      ) : loadingHistory ? (
+        <div className="flex-1 flex flex-col min-h-0 relative">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
+            <ChatThreadSkeleton />
+          </div>
+
+          {/* Sticky Bottom Chat Input Bar */}
+          <div className="sticky bottom-0 bg-gradient-to-t from-[#F8FAFC] via-[#F8FAFC]/95 to-transparent pt-3 pb-5 px-4 z-20">
+            <div className="max-w-3xl mx-auto flex flex-col gap-2">
+              <ChatInput
+                activeProject={activeProject}
+                onSendMessage={handleSendMessage}
+                onDocumentUploaded={onDocumentUploaded}
+                onOpenNewProjectModal={onOpenNewProjectModal}
+                loading={true}
+                placeholder="Loading thread..."
+              />
+            </div>
+          </div>
+        </div>
+      ) : messages.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center min-h-0 px-4 py-8 text-center max-w-3xl mx-auto w-full">
           {/* Brand Icon & Welcome Title */}
           <div className="flex flex-col items-center gap-3 mb-6">
@@ -519,7 +632,9 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
                 {activeProject ? activeProject.title : "Document Intelligence"}
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 max-w-lg leading-relaxed">
-                Ask anything across your indexed documents with verified page citations, vector telemetry, and architecture diagram generation.
+                {documentCount === 0
+                  ? "Ask anything about your project, or click Attach below to index documents."
+                  : "Ask anything across your indexed documents with verified page citations, vector telemetry, and architecture diagram generation."}
               </p>
             </div>
           </div>
@@ -534,30 +649,34 @@ export const PerplexityChat: React.FC<PerplexityChatProps> = ({
               loading={loading}
               placeholder={
                 activeProject
-                  ? `Ask anything about ${activeProject.title}...`
+                  ? documentCount === 0
+                    ? "Ask a question or click Attach to upload files..."
+                    : `Ask anything about ${activeProject.title}...`
                   : "Ask anything about your documents..."
               }
             />
           </div>
 
-          {/* Quick Start Prompt Starters */}
-          <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            {starterSuggestions.map((item, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleSendMessage(item.prompt)}
-                className="flex items-start gap-2 p-3 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-blue-300 rounded-xl text-left transition-all shadow-2xs cursor-pointer group"
-              >
-                <div className="size-6 rounded-md bg-blue-50 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-blue-100 transition-colors">
-                  {item.icon}
-                </div>
-                <span className="text-xs font-semibold text-slate-700 group-hover:text-slate-900 leading-snug">
-                  {item.label}
-                </span>
-              </button>
-            ))}
-          </div>
+          {/* Quick Start Prompt Starters - only when documents exist */}
+          {documentCount > 0 && (
+            <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {starterSuggestions.map((item, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSendMessage(item.prompt)}
+                  className="flex items-start gap-2 p-3 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-blue-300 rounded-xl text-left transition-all shadow-2xs cursor-pointer group"
+                >
+                  <div className="size-6 rounded-md bg-blue-50 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-blue-100 transition-colors">
+                    {item.icon}
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700 group-hover:text-slate-900 leading-snug">
+                    {item.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         /* 2. THREAD VIEW: Smooth, high-performance scrollable conversation */
