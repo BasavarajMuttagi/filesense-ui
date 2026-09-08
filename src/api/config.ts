@@ -1,7 +1,8 @@
-export const DEFAULT_API_BASE_URL = "https://file-sense-worker.basavaraj2770.workers.dev";
+export const DEFAULT_API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string) || "http://localhost:8787";
+
 export const CLERK_PUBLISHABLE_KEY =
-  (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string) ||
-  "pk_test_YWN0aXZlLWFtb2ViYS0zNTEzLmNsZXJrLmFjY291bnRzLmRldiQ";
+  (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string) || "";
 
 const STORAGE_KEY_BASE_URL = "filesense_api_base_url";
 const STORAGE_KEY_DEV_TOKEN = "filesense_dev_token";
