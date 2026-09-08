@@ -14,7 +14,7 @@ import {
 interface ChatInputProps {
   activeProject: Project | null;
   onSendMessage: (question: string) => void;
-  onDocumentUploaded: () => void;
+  onDocumentUploaded?: () => void;
   onOpenNewProjectModal: () => void;
   loading: boolean;
   placeholder?: string;
@@ -32,7 +32,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [text, setText] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null);
+  const [uploadSuccessName, setUploadSuccessName] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -73,7 +74,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     setIsUploading(true);
     setErrorMessage(null);
-    setUploadStatus(`Uploading ${file.name}...`);
+    setUploadSuccessName(null);
+    setUploadFileName(file.name);
     setUploadProgress({ loaded: 0, total: file.size, percentage: 0 });
 
     try {
@@ -82,25 +84,27 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         { projectId: activeProject.id, file, token },
         (p) => {
           setUploadProgress(p);
-          setUploadStatus(`Indexing ${file.name} (${p.percentage}%)...`);
         }
       );
 
-      setUploadStatus(`✓ Indexed ${file.name}`);
-      onDocumentUploaded();
+      // Upload finished: dismiss progress bar and display single success indicator
+      setIsUploading(false);
+      setUploadProgress(null);
+      setUploadFileName(null);
+      setUploadSuccessName(file.name);
+      onDocumentUploaded?.();
 
       setTimeout(() => {
-        setIsUploading(false);
-        setUploadProgress(null);
-        setUploadStatus(null);
-      }, 2200);
+        setUploadSuccessName(null);
+      }, 2500);
     } catch (err: unknown) {
       console.error("Upload failed:", err);
       const rawMsg = err instanceof Error ? err.message : "Failed to upload file.";
       setErrorMessage(rawMsg);
       setIsUploading(false);
       setUploadProgress(null);
-      setUploadStatus(null);
+      setUploadFileName(null);
+      setUploadSuccessName(null);
     }
   };
 
@@ -161,7 +165,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         />
 
         {/* Bottom Action Bar */}
-        <div className="flex items-center justify-between pt-2.5 mt-1 border-t border-[#1616130a]">
+        <div className="flex items-center justify-between pt-1">
           {/* Left: Attach Document Button */}
           <div className="flex items-center gap-2">
             <button
@@ -199,12 +203,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </button>
         </div>
 
-        {/* Upload Progress Banner */}
+        {/* Upload Progress Banner (ONLY while actively uploading) */}
         {isUploading && (
-          <div className="mt-2.5 pt-2 border-t border-[#1616130a] flex items-center justify-between text-xs text-[#161613b3]">
+          <div className="mt-2 flex items-center justify-between text-xs text-[#161613b3] bg-[#FAF9F6] px-3 py-2 rounded-2xl">
             <div className="flex items-center gap-2 min-w-0">
               <Loader2 className="size-3.5 animate-spin text-[#7C5CFC]" />
-              <span className="truncate">{uploadStatus}</span>
+              <span className="truncate">Uploading {uploadFileName || "file"}...</span>
             </div>
             {uploadProgress && (
               <span className="font-mono text-[#7C5CFC] font-semibold bg-[#E2DAFF]/60 px-2 py-0.5 rounded-full text-[11px] shrink-0">
@@ -214,11 +218,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </div>
         )}
 
-        {/* Upload Success indicator */}
-        {uploadStatus?.startsWith("✓") && (
-          <div className="mt-2.5 pt-2 border-t border-[#1616130a] flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-[#E8F8ED] px-3 py-1.5 rounded-xl">
-            <CheckCircle2 className="size-4 text-emerald-600" />
-            <span>{uploadStatus}</span>
+        {/* Upload Success indicator (ONLY after upload finishes, never stacked) */}
+        {!isUploading && uploadSuccessName && (
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-[#E8F8ED] px-3 py-2 rounded-2xl animate-in fade-in duration-150">
+            <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+            <span className="truncate">Uploaded {uploadSuccessName}</span>
           </div>
         )}
       </div>

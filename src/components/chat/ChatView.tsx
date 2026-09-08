@@ -31,7 +31,7 @@ interface ChatViewProps {
   onSelectProject?: (projectId: string) => void;
   activeSessionId: string | null;
   documentCount?: number;
-  onDocumentUploaded: () => void;
+  onDocumentUploaded?: () => void;
   onOpenNewProjectModal: () => void;
   onSessionCreated?: (sessionId: string, firstQuestion: string) => void;
   onNewChat?: () => void;
@@ -77,7 +77,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = React.memo(
           </div>
         </div>
 
-        {/* Grounded Citations Reel */}
+        {/* Grounded Citation Excerpt Modal (displayed when inline citation badge is clicked) */}
         {msg.sources && msg.sources.length > 0 && (
           <SourceChips
             sources={msg.sources}

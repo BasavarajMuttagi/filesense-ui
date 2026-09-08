@@ -92,11 +92,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   type="button"
                   onClick={() => onSelectProject(p.id)}
                   title={p.title}
-                  className={`size-8 flex items-center justify-center rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
-                    isActive
+                  className={`size-8 flex items-center justify-center rounded-2xl text-xs font-semibold transition-all cursor-pointer ${isActive
                       ? "bg-[#7C5CFC] text-white shadow-xs"
                       : "text-[#16161399] hover:bg-[#1616130d] hover:text-[#161613]"
-                  }`}
+                    }`}
                 >
                   {p.title.charAt(0).toUpperCase()}
                 </button>
@@ -169,9 +168,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             >
               <span>Projects</span>
               <ChevronDown
-                className={`size-3 transition-transform duration-200 ${
-                  projectsExpanded ? "" : "-rotate-90"
-                }`}
+                className={`size-3 transition-transform duration-200 ${projectsExpanded ? "" : "-rotate-90"
+                  }`}
               />
             </button>
 
@@ -201,27 +199,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     <div
                       key={p.id}
                       onClick={() => onSelectProject(p.id)}
-                      className={`group relative flex items-center justify-between px-2.5 py-2 text-xs rounded-xl cursor-pointer transition-all ${
-                        isActive
+                      className={`group relative flex items-center justify-between px-2.5 py-2 text-xs rounded-xl cursor-pointer transition-all ${isActive
                           ? "bg-white text-[#161613] font-medium shadow-xs border border-[#16161310]"
                           : "text-[#161613b3] hover:bg-[#16161308] hover:text-[#161613] border border-transparent"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <Folder
-                          className={`size-3.5 shrink-0 ${
-                            isActive ? "text-[#7C5CFC]" : "text-[#16161366]"
-                          }`}
+                          className={`size-3.5 shrink-0 ${isActive ? "text-[#7C5CFC]" : "text-[#16161366]"
+                            }`}
                         />
                         <span className="truncate max-w-[130px]">{p.title}</span>
                       </div>
 
                       <div className="flex items-center gap-1 shrink-0">
-                        {typeof p.documentCount === "number" && p.documentCount > 0 && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[#E2DAFF]/60 text-[#5B3EDB] font-medium">
-                            {p.documentCount}
-                          </span>
-                        )}
 
                         <button
                           type="button"
@@ -267,9 +258,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             >
               <span>Recent Threads</span>
               <ChevronDown
-                className={`size-3 transition-transform duration-200 ${
-                  sessionsExpanded ? "" : "-rotate-90"
-                }`}
+                className={`size-3 transition-transform duration-200 ${sessionsExpanded ? "" : "-rotate-90"
+                  }`}
               />
             </button>
           </div>
@@ -291,16 +281,14 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                     <div
                       key={s.sessionId}
                       onClick={() => onSelectSession(s.sessionId)}
-                      className={`flex items-center gap-2 px-2.5 py-2 text-xs rounded-xl cursor-pointer transition-all ${
-                        isActive
+                      className={`flex items-center gap-2 px-2.5 py-2 text-xs rounded-xl cursor-pointer transition-all ${isActive
                           ? "bg-[#E2DAFF] text-[#161613] font-medium shadow-2xs"
                           : "text-[#161613b3] hover:bg-[#16161308] hover:text-[#161613] border border-transparent"
-                      }`}
+                        }`}
                     >
                       <MessageSquare
-                        className={`size-3.5 shrink-0 ${
-                          isActive ? "text-[#7C5CFC]" : "text-[#16161366]"
-                        }`}
+                        className={`size-3.5 shrink-0 ${isActive ? "text-[#7C5CFC]" : "text-[#16161366]"
+                          }`}
                       />
                       <span className="truncate leading-relaxed" title={s.title}>
                         {s.title}

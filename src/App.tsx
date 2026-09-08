@@ -58,9 +58,11 @@ export function App() {
   const fetchDocuments = useCallback(async (projectId: string) => {
     try {
       const docs = await getDocumentsByProject(projectId);
-      setDocuments(docs);
+      // Deduplicate by ID to prevent any duplicate key/card rendering
+      const uniqueDocs = Array.from(new Map(docs.map((d) => [d.id, d])).values());
+      setDocuments(uniqueDocs);
       setProjects((prev) =>
-        prev.map((p) => (p.id === projectId ? { ...p, documentCount: docs.length } : p))
+        prev.map((p) => (p.id === projectId ? { ...p, documentCount: uniqueDocs.length } : p))
       );
     } catch (err) {
       console.error("Failed to load documents:", err);
@@ -195,10 +197,23 @@ export function App() {
 
     const interval = setInterval(() => {
       fetchDocuments(selectedProjectId);
-    }, 4000);
+    }, 2500);
 
     return () => clearInterval(interval);
   }, [documents, selectedProjectId, fetchDocuments]);
+
+  // Handle newly uploaded document: open panel and fetch real document state from backend
+  const handleDocumentUploaded = useCallback(() => {
+    if (!selectedProjectId) return;
+
+    // Ensure the artifacts panel is open so the user sees the file indexing
+    setArtifactsPanelOpen(true);
+
+    // Trigger immediate and short-interval synchronization with backend
+    fetchDocuments(selectedProjectId);
+    setTimeout(() => selectedProjectId && fetchDocuments(selectedProjectId), 800);
+    setTimeout(() => selectedProjectId && fetchDocuments(selectedProjectId), 2500);
+  }, [selectedProjectId, fetchDocuments]);
 
   // Handlers
   const handleProjectCreated = (newProject: Project) => {
@@ -322,7 +337,7 @@ export function App() {
             onSelectProject={(id) => setSelectedProjectId(id)}
             activeSessionId={activeSessionId}
             documentCount={documents.length}
-            onDocumentUploaded={() => selectedProjectId && fetchDocuments(selectedProjectId)}
+            onDocumentUploaded={handleDocumentUploaded}
             onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
             onSessionCreated={handleSessionCreated}
             onNewChat={handleNewChat}
@@ -339,7 +354,6 @@ export function App() {
         isOpen={artifactsPanelOpen}
         loading={loadingDocuments}
         onClose={() => setArtifactsPanelOpen(false)}
-        onDocumentUploaded={() => selectedProjectId && fetchDocuments(selectedProjectId)}
         onDeleteDocument={handleDeleteDocument}
         onInspectDocument={(doc) => setInspectingDocument(doc)}
         onOpenNewProjectModal={() => setNewProjectModalOpen(true)}

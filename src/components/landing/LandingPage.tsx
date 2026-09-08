@@ -3,7 +3,6 @@ import { SignUpButton } from "@clerk/clerk-react";
 import {
   Layers,
   ArrowRight,
-  FileText,
   Search,
   Cpu,
   ShieldCheck,
@@ -75,11 +74,10 @@ export const LandingPage: React.FC = () => {
     <div className="w-full min-h-screen bg-[#FAF9F6] text-[#161613] font-sans selection:bg-[#E2DAFF] selection:text-[#161613]">
       {/* 1. STICKY NAVIGATION: 100% transparent at top, frosted glass when scrolled */}
       <header
-        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-          isScrolled
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled
             ? "bg-[#FAF9F6]/85 backdrop-blur-md shadow-2xs py-3 border-b border-[#16161308]"
             : "bg-transparent py-4 border-b border-transparent"
-        }`}
+          }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           {/* Brand Logo */}
@@ -167,47 +165,6 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grounded Citation Reel */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#16161380] uppercase tracking-wider">
-                  <span className="size-4.5 rounded-full bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center">
-                    <FileText className="size-2.5" />
-                  </span>
-                  <span>Grounded Citations (3 Chunks Matched)</span>
-                </div>
-
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-                  <div className="p-2.5 bg-white border border-[#16161310] rounded-2xl min-w-[170px] shadow-2xs">
-                    <div className="flex items-center justify-between text-xs font-semibold text-[#161613]">
-                      <span>Architecture.pdf</span>
-                      <span className="font-mono text-[10px] bg-[#E2DAFF] text-[#7C5CFC] size-4.5 rounded-full flex items-center justify-center">
-                        1
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[10px] text-[#16161380] mt-1.5 font-mono">
-                      <span>Page 14</span>
-                      <span className="px-1.5 py-0.5 rounded-full bg-[#D8F3E5] text-[#136C40] font-semibold">
-                        96% match
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-2.5 bg-white border border-[#16161310] rounded-2xl min-w-[170px] shadow-2xs">
-                    <div className="flex items-center justify-between text-xs font-semibold text-[#161613]">
-                      <span>PipelineSpecs.md</span>
-                      <span className="font-mono text-[10px] bg-[#E2DAFF] text-[#7C5CFC] size-4.5 rounded-full flex items-center justify-center">
-                        2
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[10px] text-[#16161380] mt-1.5 font-mono">
-                      <span>Section 3.2</span>
-                      <span className="px-1.5 py-0.5 rounded-full bg-[#D8F3E5] text-[#136C40] font-semibold">
-                        91% match
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* Assistant Message */}
               <div className="bg-white rounded-3xl border border-[#16161310] p-5 sm:p-6 shadow-xs space-y-4">
@@ -546,9 +503,8 @@ export const LandingPage: React.FC = () => {
                   >
                     <span>{faq.q}</span>
                     <ChevronDown
-                      className={`size-4 text-[#16161380] transition-transform duration-200 shrink-0 ${
-                        isOpen ? "rotate-180 text-[#7C5CFC]" : ""
-                      }`}
+                      className={`size-4 text-[#16161380] transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180 text-[#7C5CFC]" : ""
+                        }`}
                     />
                   </button>
 

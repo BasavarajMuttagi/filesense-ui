@@ -15,7 +15,7 @@ export const ChatMarkdown: React.FC<ChatMarkdownProps> = React.memo(({
   isStreaming,
   onCitationClick,
 }) => {
-  // Pre-process inline citations like [1] or [1][2] into Tiimo circular pastel pills
+  // Pre-process inline citations like [1] or [1][2] into sleek bracketed citation badges (no circles)
   const renderFormattedText = (text: string) => {
     const parts = text.split(/(\[\d+\])/g);
     if (parts.length === 1) return text;
@@ -30,10 +30,10 @@ export const ChatMarkdown: React.FC<ChatMarkdownProps> = React.memo(({
             key={i}
             type="button"
             onClick={() => onCitationClick?.(sourceIndex)}
-            className="inline-flex items-center justify-center font-mono text-[10px] font-bold text-[#7C5CFC] bg-[#E2DAFF] hover:bg-[#d5c8ff] size-5 rounded-full border border-[#7C5CFC33] transition-transform active:scale-90 cursor-pointer align-baseline mx-0.5 shadow-2xs"
+            className="inline-flex items-center font-mono text-[11px] font-semibold text-[#7C5CFC] bg-[#F1EDFF] hover:bg-[#E2DAFF] hover:text-[#5229EC] px-1.5 py-0.5 rounded-md border border-[#7C5CFC26] transition-all active:scale-95 cursor-pointer align-baseline mx-0.5 select-none"
             title={`View source citation [${citationNum}]`}
           >
-            {citationNum}
+            [{citationNum}]
           </button>
         );
       }

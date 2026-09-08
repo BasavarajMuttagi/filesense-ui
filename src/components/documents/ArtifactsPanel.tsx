@@ -23,7 +23,6 @@ interface ArtifactsPanelProps {
   isOpen: boolean;
   loading?: boolean;
   onClose: () => void;
-  onDocumentUploaded: () => void;
   onDeleteDocument: (docId: string) => Promise<void>;
   onInspectDocument: (docItem: DocumentItem) => void;
   onOpenNewProjectModal: () => void;
@@ -127,9 +126,6 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
           <h3 className="font-serif font-bold text-sm text-[#161613]">
             Files
           </h3>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#E2DAFF] text-[#7C5CFC] font-semibold">
-            {documents.length}
-          </span>
         </div>
 
         <button
@@ -159,13 +155,15 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
             </button>
           </div>
         ) : documents.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#16161318] rounded-3xl bg-white">
-            <FileText className="size-8 text-[#16161333] mb-2" />
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-[#1616130f] rounded-3xl bg-white shadow-2xs">
+            <div className="size-11 rounded-2xl bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center mb-3 shadow-2xs">
+              <FileText className="size-5" />
+            </div>
             <h4 className="font-serif text-sm font-semibold text-[#161613] mb-1">
               No files in this project
             </h4>
             <p className="text-xs text-[#16161380] max-w-xs leading-relaxed">
-              Drop documents into chat or click Attach to index files.
+              Click Attach in chat to upload and index documents.
             </p>
           </div>
         ) : (
@@ -197,7 +195,7 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
 
               {/* Right: Actions */}
               <div className="flex items-center gap-1 shrink-0">
-                {doc.status === "processing" ? (
+                {doc.status === "processing" || doc.status === "created" ? (
                   <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF0B3] text-[#B88700] text-[10px] font-mono font-semibold">
                     <Loader2 className="size-2.5 animate-spin" />
                     <span>Indexing</span>
