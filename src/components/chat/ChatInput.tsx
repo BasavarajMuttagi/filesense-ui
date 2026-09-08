@@ -64,8 +64,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const handleFileUpload = async (file: File) => {
-    if (!file) return;
+  const handleFilesUpload = async (files: File[]) => {
+    if (!files || files.length === 0) return;
 
     if (!activeProject) {
       onOpenNewProjectModal();
@@ -75,42 +75,63 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setIsUploading(true);
     setErrorMessage(null);
     setUploadSuccessName(null);
-    setUploadFileName(file.name);
-    setUploadProgress({ loaded: 0, total: file.size, percentage: 0 });
 
-    try {
-      const token = await getToken();
-      await uploadFile(
-        { projectId: activeProject.id, file, token },
-        (p) => {
-          setUploadProgress(p);
-        }
-      );
+    const total = files.length;
+    let successCount = 0;
+    const failedFiles: string[] = [];
 
-      // Upload finished: dismiss progress bar and display single success indicator
-      setIsUploading(false);
-      setUploadProgress(null);
-      setUploadFileName(null);
-      setUploadSuccessName(file.name);
-      onDocumentUploaded?.();
+    for (let i = 0; i < total; i++) {
+      const file = files[i];
+      const fileIndex = i + 1;
 
+      if (total > 1) {
+        setUploadFileName(`${file.name} (${fileIndex}/${total})`);
+      } else {
+        setUploadFileName(file.name);
+      }
+
+      setUploadProgress({ loaded: 0, total: file.size, percentage: 0 });
+
+      try {
+        const token = await getToken();
+        await uploadFile(
+          { projectId: activeProject.id, file, token },
+          (p) => {
+            setUploadProgress(p);
+          }
+        );
+        successCount++;
+        // Notify parent immediately when each file finishes so it appears in the sidebar right away!
+        onDocumentUploaded?.();
+      } catch (err: unknown) {
+        console.error(`Failed to upload ${file.name}:`, err);
+        failedFiles.push(file.name);
+      }
+    }
+
+    setIsUploading(false);
+    setUploadProgress(null);
+    setUploadFileName(null);
+
+    if (successCount === total) {
+      setUploadSuccessName(total === 1 ? files[0].name : `${total} files`);
       setTimeout(() => {
         setUploadSuccessName(null);
-      }, 2500);
-    } catch (err: unknown) {
-      console.error("Upload failed:", err);
-      const rawMsg = err instanceof Error ? err.message : "Failed to upload file.";
-      setErrorMessage(rawMsg);
-      setIsUploading(false);
-      setUploadProgress(null);
-      setUploadFileName(null);
-      setUploadSuccessName(null);
+      }, 3000);
+    } else if (successCount > 0) {
+      setUploadSuccessName(`${successCount} of ${total} files`);
+      setErrorMessage(`Failed to upload: ${failedFiles.join(", ")}`);
+      setTimeout(() => {
+        setUploadSuccessName(null);
+      }, 4000);
+    } else {
+      setErrorMessage(`Failed to upload files: ${failedFiles.join(", ")}`);
     }
   };
 
   const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFileUpload(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) handleFilesUpload(files);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -126,8 +147,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFileUpload(file);
+    const files = Array.from(e.dataTransfer.files || []);
+    if (files.length > 0) handleFilesUpload(files);
   };
 
   return (
@@ -147,6 +168,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <input
           ref={fileInputRef}
           type="file"
+          multiple
           className="hidden"
           onChange={onFileSelect}
           accept=".pdf,.txt,.docx,.png,.jpg,.jpeg"
