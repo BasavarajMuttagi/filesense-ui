@@ -12,9 +12,11 @@ import { ChatView } from "./components/chat/ChatView";
 import { ArtifactsPanel } from "./components/documents/ArtifactsPanel";
 import { DocumentInspector } from "./components/documents/DocumentInspector";
 import { NewProjectModal } from "./components/chat/NewProjectModal";
+import { LandingPage } from "./components/landing/LandingPage";
+import { Layers } from "lucide-react";
 
 export function App() {
-  const { getToken, isLoaded } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   // Core Data States
   const [projects, setProjects] = useState<Project[]>([]);
@@ -30,7 +32,7 @@ export function App() {
   const [inspectingDocument, setInspectingDocument] = useState<DocumentItem | null>(null);
 
   // Loading States for Skeletons
-  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [loadingProjects, setLoadingProjects] = useState(false);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [loadingQueries, setLoadingQueries] = useState(false);
@@ -96,10 +98,11 @@ export function App() {
 
   // Initial Load when Auth is loaded
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || !isSignedIn) return;
     let active = true;
 
     const loadInitial = async () => {
+      setLoadingProjects(true);
       try {
         const data = await getProjects();
         if (active) {
@@ -121,10 +124,11 @@ export function App() {
     return () => {
       active = false;
     };
-  }, [isLoaded]);
+  }, [isLoaded, isSignedIn]);
 
   // When selected project changes, load its documents and sessions
   useEffect(() => {
+    if (!isSignedIn) return;
     let active = true;
     const loadProjectData = async () => {
       if (!selectedProjectId) {
@@ -172,7 +176,7 @@ export function App() {
     return () => {
       active = false;
     };
-  }, [selectedProjectId, fetchSessions]);
+  }, [selectedProjectId, fetchSessions, isSignedIn]);
 
   // Handle switching active chat session
   const handleSelectSession = useCallback(async (sessionId: string) => {
@@ -258,8 +262,25 @@ export function App() {
   const activeProject = projects.find((p) => p.id === selectedProjectId) || null;
   const activeSession = sessions.find((s) => s.sessionId === activeSessionId) || null;
 
+  // 1. Loading screen while Clerk authentication initializes
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen w-screen bg-[#FAF9F6] flex flex-col items-center justify-center font-sans select-none">
+        <div className="size-12 rounded-2xl bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center shadow-xs mb-3 animate-pulse">
+          <Layers className="size-6" />
+        </div>
+        <span className="text-xs font-medium text-[#16161380]">Initializing FileSense...</span>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated state: Render the Tiimo-inspired Landing Page
+  if (!isSignedIn) {
+    return <LandingPage />;
+  }
+
   return (
-    <div className="flex h-screen w-screen bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans selection:bg-[#0052FF]/15 selection:text-[#0052FF]">
+    <div className="flex h-screen w-screen bg-[#FAF9F6] text-[#161613] overflow-hidden font-sans selection:bg-[#E2DAFF] selection:text-[#161613]">
       {/* 1. Left Column: App Sidebar Navigation */}
       <AppSidebar
         projects={projects}

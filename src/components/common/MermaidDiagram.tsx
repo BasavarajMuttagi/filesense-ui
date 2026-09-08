@@ -204,8 +204,8 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = React.memo(({ code,
 
   if (isStreaming && !svgContent) {
     return (
-      <div className="my-4 border border-blue-100 bg-blue-50/50 rounded-xl p-4 flex items-center justify-center gap-2.5 text-xs text-slate-600 font-sans shadow-2xs">
-        <GitBranch className="size-4 text-[#0052FF] animate-pulse" />
+      <div className="my-4 border border-[#E2DAFF] bg-[#F5F2FF] rounded-3xl p-4 flex items-center justify-center gap-2.5 text-xs text-[#3D2785] font-sans shadow-2xs">
+        <GitBranch className="size-4 text-[#7C5CFC] animate-pulse" />
         <span className="font-medium">Generating visual diagram...</span>
       </div>
     );
@@ -213,40 +213,40 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = React.memo(({ code,
 
   if (renderError) {
     return (
-      <div className="my-3 border border-slate-200 bg-slate-50 rounded-xl p-3.5 font-mono text-xs shadow-2xs">
-        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 text-slate-500">
-          <span className="flex items-center gap-1.5 font-sans font-medium text-[11px] text-amber-700">
-            <AlertCircle className="size-3.5 text-amber-500" />
+      <div className="my-3 border border-[#16161315] bg-[#FAF9F6] rounded-3xl p-4 font-mono text-xs shadow-2xs">
+        <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#16161310] text-[#16161375]">
+          <span className="flex items-center gap-1.5 font-sans font-medium text-[11px] text-[#8E2800]">
+            <AlertCircle className="size-3.5 text-[#FF7E49]" />
             Visual Diagram Source
           </span>
           <button
             type="button"
             onClick={handleCopyCode}
-            className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] text-[#16161375] hover:text-[#161613] rounded-full px-2 py-0.5 hover:bg-[#1616130a] cursor-pointer"
           >
             {copied ? <Check className="size-3 text-emerald-600" /> : <Copy className="size-3" />}
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
-        <pre className="overflow-x-auto text-slate-700 whitespace-pre font-mono text-[11px] leading-relaxed">{code}</pre>
+        <pre className="overflow-x-auto text-[#161613] whitespace-pre font-mono text-[11px] leading-relaxed">{code}</pre>
       </div>
     );
   }
 
   return (
-    <div className="my-4 border border-slate-200 bg-white rounded-xl shadow-xs overflow-hidden font-sans">
+    <div className="my-4 border border-[#16161315] bg-white rounded-3xl shadow-xs overflow-hidden font-sans">
       {/* Diagram Header */}
-      <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
-          <div className="size-5 rounded-md bg-blue-50 text-[#0052FF] flex items-center justify-center">
+      <div className="px-5 py-3 bg-[#FAF9F6] border-b border-[#16161310] flex items-center justify-between">
+        <div className="flex items-center gap-2.5 text-xs font-medium text-[#161613]">
+          <div className="size-6 rounded-full bg-[#E2DAFF] text-[#3D2785] flex items-center justify-center">
             <GitBranch className="size-3.5" />
           </div>
-          <span>Workflow &amp; Architecture Diagram</span>
+          <span className="font-serif text-sm">Visual Architecture Diagram</span>
         </div>
         <button
           type="button"
           onClick={handleCopyCode}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 rounded-md transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-medium text-[#16161375] hover:text-[#161613] hover:bg-[#16161308] rounded-full transition-colors cursor-pointer"
         >
           {copied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
           <span>{copied ? "Copied" : "Copy Source"}</span>
@@ -256,7 +256,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = React.memo(({ code,
       {/* SVG Container */}
       <div
         ref={containerRef}
-        className="p-5 overflow-x-auto flex items-center justify-center min-h-[140px] [&_svg]:max-w-full [&_svg]:h-auto"
+        className="p-6 overflow-x-auto flex items-center justify-center min-h-[140px] [&_svg]:max-w-full [&_svg]:h-auto"
         dangerouslySetInnerHTML={{ __html: svgContent }}
       />
     </div>

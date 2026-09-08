@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { X } from "lucide-react";
 
-interface SwissModalProps {
+interface TiimoModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
@@ -12,7 +12,9 @@ interface SwissModalProps {
   maxWidth?: "sm" | "md" | "lg" | "xl";
 }
 
-export const SwissModal: React.FC<SwissModalProps> = ({
+export type SwissModalProps = TiimoModalProps;
+
+export const TiimoModal: React.FC<TiimoModalProps> = ({
   isOpen,
   onClose,
   title,
@@ -44,7 +46,7 @@ export const SwissModal: React.FC<SwissModalProps> = ({
   if (maxWidth === "xl") widthClass = "max-w-2xl";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150 font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#161613]/40 backdrop-blur-xs animate-in fade-in duration-150 font-sans">
       <div
         className="fixed inset-0"
         onClick={onClose}
@@ -53,28 +55,28 @@ export const SwissModal: React.FC<SwissModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative z-10 w-full ${widthClass} bg-white border border-slate-200 rounded-2xl shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150`}
+        className={`relative z-10 w-full ${widthClass} bg-white border border-[#16161315] rounded-3xl shadow-xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-150`}
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+        <div className="px-6 py-4.5 border-b border-[#16161310] flex items-center justify-between bg-white">
           <div className="flex items-center gap-3 min-w-0">
             {icon && (
-              <div className="size-8 rounded-lg bg-blue-50 text-[#0052FF] flex items-center justify-center shrink-0 border border-blue-100">
+              <div className="size-9 rounded-2xl bg-[#E2DAFF] text-[#3D2785] flex items-center justify-center shrink-0 border border-[#D5CBFF]">
                 {icon}
               </div>
             )}
             <div className="flex flex-col min-w-0">
-              <h3 className="text-sm font-bold tracking-tight text-slate-900 truncate">
+              <h3 className="text-base font-serif font-medium tracking-tight text-[#161613] truncate">
                 {title}
               </h3>
               {subtitle && (
-                <p className="text-[11px] text-slate-600 truncate">{subtitle}</p>
+                <p className="text-xs text-[#16161375] truncate">{subtitle}</p>
               )}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="size-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+            className="size-8 flex items-center justify-center rounded-full text-[#16161375] hover:text-[#161613] hover:bg-[#1616130a] transition-colors cursor-pointer shrink-0"
             aria-label="Close modal"
           >
             <X className="size-4" />
@@ -86,7 +88,7 @@ export const SwissModal: React.FC<SwissModalProps> = ({
 
         {/* Modal Footer */}
         {footer && (
-          <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/60 flex items-center justify-end gap-2.5">
+          <div className="px-6 py-4 border-t border-[#16161310] bg-[#FAF9F6]/80 flex items-center justify-end gap-2.5">
             {footer}
           </div>
         )}
@@ -94,3 +96,5 @@ export const SwissModal: React.FC<SwissModalProps> = ({
     </div>
   );
 };
+
+export const SwissModal = TiimoModal;

@@ -22,30 +22,30 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onToggleSidebar,
 }) => {
   return (
-    <header className="h-11 w-full bg-white border-b border-slate-200/80 sticky top-0 z-20 flex items-center justify-between px-4 font-sans select-none">
+    <header className="h-12 w-full bg-[#FAF9F6]/90 backdrop-blur-md border-b border-[#16161310] sticky top-0 z-20 flex items-center justify-between px-4 font-sans select-none transition-colors">
       {/* Left: Mobile Menu Toggle + Clean Breadcrumb Navigation */}
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-2.5 min-w-0">
         <button
           type="button"
           onClick={onToggleSidebar}
           aria-label="Toggle navigation sidebar"
-          className="lg:hidden shrink-0 size-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
+          className="lg:hidden shrink-0 size-8 flex items-center justify-center rounded-full text-[#16161399] hover:bg-[#1616130a] hover:text-[#161613] transition-colors cursor-pointer"
         >
           <Menu className="size-4" />
         </button>
 
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 min-w-0 text-xs">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0 text-xs">
           {!activeProject ? (
-            <span className="font-medium text-slate-500 truncate">
+            <span className="font-medium text-[#16161380] truncate">
               No project selected
             </span>
           ) : (
             <>
               {/* Project Crumb */}
-              <div className="flex items-center gap-1.5 text-slate-600 shrink-0">
-                <Folder className="size-3.5 text-slate-400" />
+              <div className="flex items-center gap-1.5 text-[#16161399] shrink-0 font-medium">
+                <Folder className="size-3.5 text-[#7C5CFC]" />
                 <span
-                  className="font-medium text-slate-700 truncate max-w-[130px] sm:max-w-[200px]"
+                  className="truncate max-w-[120px] sm:max-w-[180px]"
                   title={activeProject.title}
                 >
                   {activeProject.title}
@@ -53,13 +53,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </div>
 
               {/* Separator */}
-              <ChevronRight className="size-3 text-slate-300 shrink-0" />
+              <ChevronRight className="size-3 text-[#16161333] shrink-0" />
 
               {/* Active Thread Crumb */}
-              <div className="flex items-center gap-1.5 min-w-0 text-slate-900 font-semibold">
+              <div className="flex items-center gap-1.5 min-w-0 text-[#161613] font-serif font-semibold text-sm">
                 {activeSession ? (
                   <>
-                    <MessageSquare className="size-3 text-slate-400 shrink-0" />
+                    <MessageSquare className="size-3.5 text-[#7C5CFC] shrink-0" />
                     <span
                       className="truncate max-w-[180px] sm:max-w-[360px]"
                       title={activeSession.title}
@@ -68,7 +68,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                     </span>
                   </>
                 ) : (
-                  <span className="text-slate-800">New thread</span>
+                  <span className="italic text-[#161613b3]">New thread</span>
                 )}
               </div>
             </>
@@ -76,16 +76,16 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </nav>
       </div>
 
-      {/* Right: Files Side Panel Toggle without count or profile */}
+      {/* Right: Files Side Panel Toggle with Tiimo pill button styling */}
       <div className="flex items-center gap-2 shrink-0">
         <button
           type="button"
           onClick={onToggleArtifactsPanel}
           title={artifactsPanelOpen ? "Close files panel" : "Open files panel"}
-          className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all cursor-pointer ${
             artifactsPanelOpen
-              ? "bg-slate-100 text-slate-900 border-slate-300/80 shadow-2xs font-semibold"
-              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+              ? "bg-[#161613] text-white shadow-xs"
+              : "bg-white/80 hover:bg-white text-[#161613] border border-[#16161314] hover:border-[#16161328] shadow-2xs"
           }`}
         >
           <PanelRight className="size-3.5" />

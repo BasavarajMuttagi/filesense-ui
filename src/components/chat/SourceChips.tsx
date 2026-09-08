@@ -3,7 +3,7 @@ import type { SourceItem } from "../../types";
 import { FileText, Copy, Check, ChevronRight, X } from "lucide-react";
 
 // Normalize raw scores: converts Upstash Hybrid RRF scores (range 0.005-0.033) or cosine scores (0-1) into human-intuitive 0-100%
-export function formatMatchScore(rawScore: number | undefined): number {
+function formatMatchScore(rawScore: number | undefined): number {
   if (!rawScore || rawScore <= 0) return 0;
   if (rawScore >= 0.20) return Math.min(100, Math.round(rawScore * 100));
 
@@ -60,15 +60,17 @@ export const SourceChips: React.FC<SourceChipsProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 my-2.5 font-sans">
+    <div className="flex flex-col gap-2 my-3 font-sans">
       {/* Sources Header */}
-      <div className="flex items-center gap-2 text-[11px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
-        <FileText className="size-3.5 text-[#0052FF]" />
+      <div className="flex items-center gap-2 text-[11px] font-semibold text-[#16161380] uppercase tracking-wider">
+        <span className="size-4.5 rounded-full bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center">
+          <FileText className="size-2.5" />
+        </span>
         <span>Grounded Citations ({sources.length})</span>
       </div>
 
-      {/* Swiss Compact Citation Cards Reel */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-thin">
+      {/* Tiimo Rounded Citation Cards Reel */}
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5 scrollbar-thin">
         {sources.slice(0, 6).map((src, idx) => {
           const scorePct = formatMatchScore(src.score);
           const pageStr = src.pageStart ? `p. ${src.pageStart}` : null;
@@ -81,26 +83,26 @@ export const SourceChips: React.FC<SourceChipsProps> = ({
                 setClosedIndex(null);
                 setManualSource(src);
               }}
-              className="group flex flex-col justify-between p-2.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-blue-300 rounded-xl text-left min-w-[155px] max-w-[195px] h-[72px] shrink-0 transition-all duration-150 shadow-2xs hover:shadow-xs cursor-pointer select-none"
+              className="group flex flex-col justify-between p-3 bg-white hover:bg-[#FAF9F6] border border-[#16161312] hover:border-[#7C5CFC50] rounded-2xl text-left min-w-[160px] max-w-[200px] h-[74px] shrink-0 transition-all duration-150 shadow-2xs hover:shadow-xs cursor-pointer select-none"
             >
               {/* Top Row: File title + Citation index */}
               <div className="flex items-start justify-between gap-1.5 w-full">
                 <span
-                  className="text-xs font-semibold text-slate-800 group-hover:text-slate-950 truncate max-w-[115px]"
+                  className="text-xs font-semibold text-[#161613] truncate max-w-[120px]"
                   title={src.fileName}
                 >
                   {src.fileName || "Document"}
                 </span>
-                <span className="font-mono text-[10px] font-bold text-[#0052FF] bg-blue-50 group-hover:bg-blue-100 size-4.5 rounded-md flex items-center justify-center shrink-0 border border-blue-100">
+                <span className="font-mono text-[10px] font-bold text-[#7C5CFC] bg-[#E2DAFF] group-hover:bg-[#d4c8ff] size-5 rounded-full flex items-center justify-center shrink-0">
                   {idx + 1}
                 </span>
               </div>
 
               {/* Bottom Row: Score & Page */}
-              <div className="flex items-center justify-between text-[10px] text-slate-500 w-full mt-1">
-                <span className="font-mono text-slate-600">{pageStr || "Vector chunk"}</span>
+              <div className="flex items-center justify-between text-[10px] text-[#16161380] w-full mt-1">
+                <span className="font-mono text-[#16161399]">{pageStr || "Vector chunk"}</span>
                 {scorePct > 0 && (
-                  <span className="font-mono px-1 py-0.2 rounded bg-sky-50 text-sky-700 font-semibold border border-sky-100">
+                  <span className="font-mono px-1.5 py-0.5 rounded-full bg-[#D8F3E5] text-[#136C40] font-semibold">
                     {scorePct}% match
                   </span>
                 )}
@@ -116,7 +118,7 @@ export const SourceChips: React.FC<SourceChipsProps> = ({
               setClosedIndex(null);
               setManualSource(sources[6]);
             }}
-            className="flex items-center justify-center gap-1 p-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 min-w-[110px] h-[72px] shrink-0 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1 p-3 bg-[#EFECE6] hover:bg-[#E5E1D8] border border-[#16161310] rounded-2xl text-xs font-semibold text-[#161613] min-w-[110px] h-[74px] shrink-0 transition-colors cursor-pointer"
           >
             <span>+{sources.length - 6} more</span>
             <ChevronRight className="size-3.5" />
@@ -124,17 +126,17 @@ export const SourceChips: React.FC<SourceChipsProps> = ({
         )}
       </div>
 
-      {/* Swiss Citation Excerpt Inspection Modal */}
+      {/* Tiimo Citation Excerpt Inspection Modal */}
       {activeSource && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150 font-sans">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-lg w-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-[#161613]/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150 font-sans">
+          <div className="bg-white rounded-3xl border border-[#16161314] shadow-2xl max-w-lg w-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="size-7 rounded-lg bg-blue-50 text-[#0052FF] flex items-center justify-center shrink-0">
+            <div className="flex items-center justify-between px-6 py-4.5 border-b border-[#1616130d]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="size-8 rounded-full bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center shrink-0 shadow-2xs">
                   <FileText className="size-4" />
                 </div>
-                <h3 className="text-sm font-bold text-slate-900 truncate">
+                <h3 className="font-serif text-base font-bold text-[#161613] truncate">
                   {activeSource.fileName || "Source Citation"}
                 </h3>
               </div>
@@ -142,15 +144,15 @@ export const SourceChips: React.FC<SourceChipsProps> = ({
                 type="button"
                 onClick={handleClose}
                 aria-label="Close"
-                className="size-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
+                className="size-8 flex items-center justify-center rounded-full text-[#16161380] hover:bg-[#1616130d] hover:text-[#161613] transition-colors cursor-pointer"
               >
                 <X className="size-4" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-5 space-y-3">
-              <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
+            <div className="p-6 space-y-3.5">
+              <div className="flex items-center justify-between text-xs text-[#16161380] font-mono">
                 {activeSource.pageStart ? (
                   <span>
                     Page {activeSource.pageStart}
@@ -162,25 +164,25 @@ export const SourceChips: React.FC<SourceChipsProps> = ({
                 ) : (
                   <span>Chunk {activeSource.chunkIndex ?? 0}</span>
                 )}
-                <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-semibold">
-                  Semantic Score: {formatMatchScore(activeSource.score)}%
+                <span className="px-2.5 py-0.5 rounded-full bg-[#D8F3E5] text-[#136C40] font-semibold text-[11px]">
+                  Semantic Match: {formatMatchScore(activeSource.score)}%
                 </span>
               </div>
 
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 leading-relaxed max-h-80 overflow-y-auto whitespace-pre-wrap font-sans select-text">
+              <div className="p-4 bg-[#F8F7F3] border border-[#1616130d] rounded-2xl text-xs text-[#161613d9] leading-relaxed max-h-80 overflow-y-auto whitespace-pre-wrap font-sans select-text scrollbar-thin">
                 {activeSource.text}
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end px-5 py-3.5 border-t border-slate-100 bg-slate-50/60">
+            <div className="flex items-center justify-end px-6 py-4 border-t border-[#1616130d] bg-[#FAF9F6]">
               <button
                 type="button"
                 onClick={() => handleCopyExcerpt(activeSource.text)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#0052FF] hover:bg-[#0045D8] text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-[#161613] hover:bg-[#282824] text-white rounded-full shadow-xs transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
               >
                 {copied ? (
-                  <Check className="size-3.5 text-white" />
+                  <Check className="size-3.5 text-[#D8F3E5]" />
                 ) : (
                   <Copy className="size-3.5" />
                 )}

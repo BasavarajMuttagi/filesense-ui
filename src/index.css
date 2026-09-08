@@ -1,61 +1,82 @@
 @import "tailwindcss";
 
 :root {
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: 'Fraunces', 'Recoleta', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* FileSense Swiss Color Palette */
-  --fs-canvas: #F8FAFC;
-  --fs-surface: #FFFFFF;
-  --fs-surface-hover: #F1F5F9;
-  --fs-border: #E2E8F0;
-  --fs-border-strong: #CBD5E1;
-  --fs-border-subtle: #F1F5F9;
+  /* Tiimo Signature Warm Base Palette */
+  --tiimo-canvas: #FAF9F6;
+  --tiimo-surface: #FFFFFF;
+  --tiimo-surface-warm: #F8F7F3;
+  --tiimo-surface-card: #FFFFFF;
 
-  /* Brand Accents */
-  --fs-cobalt: #0052FF;
-  --fs-cobalt-hover: #0045D8;
-  --fs-cobalt-subtle: #EFF4FF;
-  --fs-cobalt-border: #BFDBFE;
+  /* Tiimo Inks */
+  --tiimo-heading: #161613;
+  --tiimo-black: #161212;
+  --tiimo-paragraphs: #161613bf;
+  --tiimo-muted: #16161375;
+  --tiimo-faint: #16161340;
 
-  --fs-cyan: #0284C7;
-  --fs-cyan-subtle: #F0F9FF;
-  --fs-cyan-border: #BAE6FD;
+  /* Tiimo Hairline Borders */
+  --tiimo-border: #16161315;
+  --tiimo-border-strong: #16161328;
+  --tiimo-border-subtle: #1616130d;
 
-  /* Signals */
-  --fs-emerald: #059669;
-  --fs-emerald-subtle: #ECFDF5;
-  --fs-emerald-border: #A7F3D0;
+  /* Tiimo Pastel Accents */
+  --tiimo-purple: #BCAAFF;
+  --tiimo-purple-light: #E2DAFF;
+  --tiimo-purple-wash: #F5F2FF;
+  --tiimo-purple-brand: #7C5CFC;
+  --tiimo-purple-text: #3D2785;
 
-  --fs-amber: #D97706;
-  --fs-amber-subtle: #FFFBEB;
-  --fs-amber-border: #FDE68A;
+  --tiimo-yellow: #FFF0B3;
+  --tiimo-yellow-light: #FFF9E0;
+  --tiimo-yellow-text: #735A00;
 
-  --fs-crimson: #DC2626;
-  --fs-crimson-subtle: #FEF2F2;
-  --fs-crimson-border: #FECACA;
+  --tiimo-peach: #FFD3C4;
+  --tiimo-peach-light: #FFEFEA;
+  --tiimo-peach-text: #8E2800;
+  --tiimo-pink: #FFB2DA;
 
-  /* Typography Inks */
-  --fs-ink-primary: #090D1A;
-  --fs-ink-secondary: #334155;
-  --fs-ink-muted: #64748B;
-  --fs-ink-faint: #94A3B8;
+  --tiimo-blue: #C3CEFF;
+  --tiimo-blue-light: #E7EBFF;
+  --tiimo-blue-text: #1E3A8A;
+
+  --tiimo-mint: #D8F3E5;
+  --tiimo-mint-light: #EBF8F2;
+  --tiimo-mint-text: #065F46;
+  --tiimo-green-secondary: #7F9A7A;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--fs-canvas);
-  color: var(--fs-ink-primary);
+  background-color: var(--tiimo-canvas);
+  color: var(--tiimo-heading);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Monospace telemetry and badges */
+/* Serif Display for Headings, Hero titles, and Editorial elements */
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Monospace telemetry and citation badges */
 code, kbd, samp, pre, .font-mono {
   font-family: var(--font-mono);
 }
 
-/* Swiss Custom Sleek Scrollbar */
+/* Tiimo Signature Top Aura Glow */
+.tiimo-aura-gradient {
+  background: radial-gradient(ellipse 80% 55% at 50% 0%, rgba(226, 218, 255, 0.7) 0%, rgba(245, 242, 255, 0.4) 50%, rgba(250, 249, 246, 0) 80%);
+}
+
+/* Tiimo Soft Warm Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -66,52 +87,44 @@ code, kbd, samp, pre, .font-mono {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #E4E0FD;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #BCAAFF;
 }
 
-/* Swiss Hairline Rules */
-.border-swiss {
-  border-color: var(--fs-border);
+/* Tiimo Soft Border Rules */
+.border-tiimo {
+  border-color: var(--tiimo-border);
 }
 
-.border-swiss-strong {
-  border-color: var(--fs-border-strong);
+.border-tiimo-strong {
+  border-color: var(--tiimo-border-strong);
 }
 
-/* Swiss Grid subtle background texture for empty / hero states */
-.swiss-grid-pattern {
-  background-size: 24px 24px;
-  background-image: 
-    linear-gradient(to right, rgba(226, 232, 240, 0.45) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(226, 232, 240, 0.45) 1px, transparent 1px);
-}
-
-/* Radar pulse animation for document ingestion & streaming */
-@keyframes radarPulse {
+/* Tiimo Pulsing Glow for Document Ingestion */
+@keyframes tiimoPulse {
   0% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 82, 255, 0.45);
+    box-shadow: 0 0 0 0 rgba(124, 92, 252, 0.45);
   }
   70% {
     transform: scale(1);
-    box-shadow: 0 0 0 8px rgba(0, 82, 255, 0);
+    box-shadow: 0 0 0 8px rgba(124, 92, 252, 0);
   }
   100% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 82, 255, 0);
+    box-shadow: 0 0 0 0 rgba(124, 92, 252, 0);
   }
 }
 
-.animate-radar {
-  animation: radarPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+.animate-tiimo-pulse {
+  animation: tiimoPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-/* Linear-style high-precision skeleton shimmer */
+/* Tiimo Warm Lavender-Cream Skeleton Shimmer */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -122,7 +135,7 @@ code, kbd, samp, pre, .font-mono {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background: linear-gradient(90deg, #F8F6F2 25%, #EFEBF8 50%, #F8F6F2 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite ease-in-out;
 }

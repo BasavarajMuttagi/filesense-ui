@@ -94,10 +94,10 @@ export const DocumentDropzone: React.FC<DocumentDropzoneProps> = ({
         onDragLeave={onDragLeave}
         onDrop={onDrop}
         onClick={() => !isUploading && fileInputRef.current?.click()}
-        className={`border-2 border-dashed transition-all duration-150 p-6 flex flex-col items-center justify-center text-center cursor-pointer select-none rounded-2xl ${
+        className={`border-2 border-dashed transition-all duration-150 p-6 flex flex-col items-center justify-center text-center cursor-pointer select-none rounded-3xl ${
           isDragging
-            ? "border-[#0052FF] bg-blue-50/40"
-            : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
+            ? "border-[#7C5CFC] bg-[#F5F2FF]/60 ring-4 ring-[#7C5CFC]/15"
+            : "border-[#16161318] bg-white hover:border-[#7C5CFC] hover:bg-[#F5F2FF]/30"
         } ${isUploading ? "pointer-events-none opacity-90" : ""}`}
       >
         <input
@@ -110,42 +110,44 @@ export const DocumentDropzone: React.FC<DocumentDropzoneProps> = ({
 
         {isUploading ? (
           <div className="w-full max-w-xs flex flex-col items-center gap-3 py-1">
-            <div className="size-6 border-2 border-[#0052FF] border-t-transparent animate-spin rounded-full" />
-            <div className="text-xs font-semibold text-slate-900">
+            <div className="size-6 border-2 border-[#7C5CFC] border-t-transparent animate-spin rounded-full" />
+            <div className="text-xs font-semibold text-[#161613]">
               Streaming to storage &amp; vector index...
             </div>
             {/* Progress bar */}
-            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-[#1616130d] h-2 rounded-full overflow-hidden">
               <div
-                className="bg-[#0052FF] h-full transition-all duration-150 rounded-full"
+                className="bg-[#7C5CFC] h-full transition-all duration-150 rounded-full"
                 style={{ width: `${progress ? Math.max(5, progress.percentage) : 10}%` }}
               />
             </div>
-            <div className="text-xs text-slate-500 font-mono">
+            <div className="text-xs text-[#16161380] font-mono">
               {progress
                 ? `${progress.percentage}% · ${formatBytes(progress.loaded)} of ${formatBytes(progress.total)}`
                 : "Preparing chunk ingestion..."}
             </div>
           </div>
         ) : successFile ? (
-          <div className="flex flex-col items-center gap-1.5 text-emerald-700 py-1">
-            <CheckCircle2 className="size-6 text-emerald-600" />
-            <div className="text-xs font-bold text-slate-900">
+          <div className="flex flex-col items-center gap-1.5 text-[#136C40] py-1">
+            <div className="size-9 rounded-full bg-[#D8F3E5] flex items-center justify-center text-[#136C40]">
+              <CheckCircle2 className="size-5" />
+            </div>
+            <div className="text-xs font-bold text-[#161613]">
               Uploaded: {successFile}
             </div>
-            <p className="text-[11px] text-slate-500 font-mono">
+            <p className="text-[11px] text-[#16161380] font-mono">
               Document chunks indexed successfully
             </p>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2">
-            <div className="size-10 bg-blue-50 text-[#0052FF] flex items-center justify-center rounded-xl shadow-2xs border border-blue-100">
-              <UploadCloud className="size-5" />
+          <div className="flex flex-col items-center gap-2.5">
+            <div className="size-11 bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center rounded-2xl shadow-2xs">
+              <UploadCloud className="size-5.5" />
             </div>
-            <div className="text-xs font-medium text-slate-700">
-              Drop documents here, or <span className="text-[#0052FF] font-semibold underline">browse</span>
+            <div className="text-xs font-medium text-[#161613]">
+              Drop documents here, or <span className="text-[#7C5CFC] font-semibold underline underline-offset-2">browse</span>
             </div>
-            <p className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">
+            <p className="text-[10px] text-[#16161366] font-mono uppercase tracking-wider">
               PDF, TXT, DOCX, Code, &amp; Images
             </p>
           </div>
@@ -153,8 +155,8 @@ export const DocumentDropzone: React.FC<DocumentDropzoneProps> = ({
       </div>
 
       {errorMessage && (
-        <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2 text-xs rounded-xl">
-          <AlertCircle className="size-4 shrink-0 text-rose-500" />
+        <div className="p-3.5 bg-[#FFF0ED] border border-[#FFD3C4] text-[#C53030] flex items-center gap-2 text-xs rounded-2xl">
+          <AlertCircle className="size-4 shrink-0 text-[#C53030]" />
           <span>{errorMessage}</span>
         </div>
       )}

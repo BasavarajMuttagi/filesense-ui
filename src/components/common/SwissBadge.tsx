@@ -1,71 +1,89 @@
 import React from "react";
 
-export type SwissBadgeVariant =
+export type TiimoBadgeVariant =
   | "default"
+  | "purple"
   | "cobalt"
+  | "blue"
   | "cyan"
+  | "mint"
   | "processed"
+  | "yellow"
   | "processing"
+  | "peach"
   | "error"
-  | "mono";
+  | "mono"
+  | "dark";
 
-interface SwissBadgeProps {
+export type SwissBadgeVariant = TiimoBadgeVariant;
+
+interface TiimoBadgeProps {
   children: React.ReactNode;
-  variant?: SwissBadgeVariant;
+  variant?: TiimoBadgeVariant;
   pulse?: boolean;
   className?: string;
   size?: "sm" | "md";
 }
 
-export const SwissBadge: React.FC<SwissBadgeProps> = ({
+export type SwissBadgeProps = TiimoBadgeProps;
+
+export const TiimoBadge: React.FC<TiimoBadgeProps> = ({
   children,
   variant = "default",
   pulse = false,
   className = "",
   size = "md",
 }) => {
-  let colorStyles = "bg-slate-100 text-slate-700 border-slate-200";
+  let colorStyles = "bg-[#F4F1EA] text-[#161613] border-[#E8E5DF]";
 
   switch (variant) {
+    case "purple":
     case "cobalt":
-      colorStyles = "bg-blue-50 text-[#0052FF] border-blue-200/90";
+      colorStyles = "bg-[#E2DAFF] text-[#3D2785] border-[#D5CBFF]";
       break;
+    case "blue":
     case "cyan":
-      colorStyles = "bg-sky-50 text-sky-700 border-sky-200/90";
+      colorStyles = "bg-[#E7EBFF] text-[#1E3A8A] border-[#C3CEFF]";
       break;
+    case "mint":
     case "processed":
-      colorStyles = "bg-emerald-50 text-emerald-700 border-emerald-200/90";
+      colorStyles = "bg-[#D8F3E5] text-[#065F46] border-[#B7EBD0]";
       break;
+    case "yellow":
     case "processing":
-      colorStyles = "bg-amber-50 text-amber-700 border-amber-200/90";
+      colorStyles = "bg-[#FFF0B3] text-[#735A00] border-[#FFE58F]";
       break;
+    case "peach":
     case "error":
-      colorStyles = "bg-rose-50 text-rose-700 border-rose-200/90";
+      colorStyles = "bg-[#FFEFEA] text-[#B91C1C] border-[#FFD3C4]";
       break;
     case "mono":
-      colorStyles = "bg-slate-900 text-white border-slate-900 font-mono";
+    case "dark":
+      colorStyles = "bg-[#161613] text-white border-[#161613]";
       break;
     default:
-      colorStyles = "bg-slate-100 text-slate-700 border-slate-200";
+      colorStyles = "bg-[#F4F1EA] text-[#161613] border-[#E8E5DF]";
       break;
   }
 
   const sizeStyles =
     size === "sm"
-      ? "px-1.5 py-0.5 text-[10px]"
-      : "px-2 py-0.5 text-[11px]";
+      ? "px-2 py-0.5 text-[10px]"
+      : "px-2.5 py-0.5 text-[11px]";
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-mono font-medium tracking-wide uppercase border rounded-md transition-colors ${sizeStyles} ${colorStyles} ${className}`}
+      className={`inline-flex items-center gap-1.5 font-sans font-medium rounded-full border transition-colors ${sizeStyles} ${colorStyles} ${className}`}
     >
       {pulse && (
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-current"></span>
+        <span className="relative flex size-1.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75" />
+          <span className="relative inline-flex rounded-full size-1.5 bg-current" />
         </span>
       )}
       {children}
     </span>
   );
 };
+
+export const SwissBadge = TiimoBadge;

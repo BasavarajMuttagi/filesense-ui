@@ -128,15 +128,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-2 font-sans">
-      {/* Modern Card-based Swiss Chat Input */}
+      {/* Tiimo Soft Rounded Card Input */}
       <div
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        className={`p-3.5 bg-white border rounded-2xl transition-all duration-150 shadow-xs ${
+        className={`p-4 bg-white border rounded-3xl transition-all duration-150 shadow-xs ${
           isDragging
-            ? "border-[#0052FF] ring-2 ring-[#0052FF]/20 bg-blue-50/30"
-            : "border-slate-200 hover:border-slate-300 focus-within:border-[#0052FF] focus-within:ring-2 focus-within:ring-[#0052FF]/10"
+            ? "border-[#7C5CFC] ring-3 ring-[#7C5CFC]/20 bg-[#F5F2FF]/40"
+            : "border-[#16161314] hover:border-[#16161324] focus-within:border-[#161613] focus-within:ring-3 focus-within:ring-[#7C5CFC]/15"
         }`}
       >
         {/* Hidden file input */}
@@ -157,11 +157,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           rows={1}
           placeholder={placeholder}
           aria-label="Ask a question"
-          className="w-full resize-none bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none leading-relaxed"
+          className="w-full resize-none bg-transparent text-sm text-[#161613] placeholder:text-[#16161366] focus:outline-none leading-relaxed min-h-[44px]"
         />
 
         {/* Bottom Action Bar */}
-        <div className="flex items-center justify-between pt-2.5 mt-1 border-t border-slate-100">
+        <div className="flex items-center justify-between pt-2.5 mt-1 border-t border-[#1616130a]">
           {/* Left: Attach Document Button */}
           <div className="flex items-center gap-2">
             <button
@@ -176,40 +176,38 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               disabled={isUploading}
               aria-label="Attach file"
               title="Attach document to project"
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#16161399] hover:text-[#161613] hover:bg-[#16161308] rounded-full transition-colors cursor-pointer disabled:opacity-50"
             >
               <Paperclip className="size-3.5" />
               <span>Attach</span>
             </button>
-
-
           </div>
 
-          {/* Right: Send Message Button */}
+          {/* Right: Send Message Button - Tiimo obsidian circle button */}
           <button
             type="button"
             onClick={handleSend}
             disabled={!text.trim() || loading || isUploading}
             aria-label="Send message"
-            className="size-8 rounded-full bg-[#0052FF] hover:bg-[#0045D8] disabled:bg-slate-200 disabled:text-slate-400 text-white flex items-center justify-center transition-all cursor-pointer shadow-xs disabled:cursor-not-allowed active:scale-95"
+            className="size-8.5 rounded-full bg-[#161613] hover:bg-[#282824] disabled:bg-[#16161312] disabled:text-[#16161340] text-white flex items-center justify-center transition-all cursor-pointer shadow-xs disabled:cursor-not-allowed active:scale-95 hover:scale-[1.03]"
           >
             {loading || isUploading ? (
-              <Loader2 className="size-4 animate-spin text-white" />
+              <Loader2 className="size-4 animate-spin text-[#161613]" />
             ) : (
-              <ArrowUp className="size-4" />
+              <ArrowUp className="size-4 stroke-[2.5]" />
             )}
           </button>
         </div>
 
         {/* Upload Progress Banner */}
         {isUploading && (
-          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+          <div className="mt-2.5 pt-2 border-t border-[#1616130a] flex items-center justify-between text-xs text-[#161613b3]">
             <div className="flex items-center gap-2 min-w-0">
-              <Loader2 className="size-3.5 animate-spin text-[#0052FF]" />
+              <Loader2 className="size-3.5 animate-spin text-[#7C5CFC]" />
               <span className="truncate">{uploadStatus}</span>
             </div>
             {uploadProgress && (
-              <span className="font-mono text-[#0052FF] font-semibold shrink-0">
+              <span className="font-mono text-[#7C5CFC] font-semibold bg-[#E2DAFF]/60 px-2 py-0.5 rounded-full text-[11px] shrink-0">
                 {uploadProgress.percentage}%
               </span>
             )}
@@ -218,7 +216,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
         {/* Upload Success indicator */}
         {uploadStatus?.startsWith("✓") && (
-          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+          <div className="mt-2.5 pt-2 border-t border-[#1616130a] flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-[#E8F8ED] px-3 py-1.5 rounded-xl">
             <CheckCircle2 className="size-4 text-emerald-600" />
             <span>{uploadStatus}</span>
           </div>
@@ -227,7 +225,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Error notification */}
       {errorMessage && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 flex items-center gap-2 text-xs">
+        <div className="p-3 bg-[#FFF0ED] border border-[#FFD3C4] rounded-2xl text-[#C53030] flex items-center gap-2 text-xs">
           <AlertCircle className="size-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
