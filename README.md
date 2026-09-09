@@ -1,5 +1,4 @@
 <div align="center">
-
   <img src="./public/favicon.svg" alt="FileSense Logo" width="64" height="64" />
 
   # FileSense
@@ -19,7 +18,10 @@
   [![Clerk Auth](https://img.shields.io/badge/Auth-Clerk-6C47FF?logo=clerk&logoColor=white&style=flat-square)](https://clerk.com/)
 
 </div>
-
+<div>
+  <img width="1470" height="846" alt="2026-09-09_11-15-47" src="https://github.com/user-attachments/assets/616f0053-e0e1-4307-af07-28f8223065ef" />
+<img width="1469" height="841" alt="image" src="https://github.com/user-attachments/assets/acca9fbb-95a7-4ca5-bd43-0b0809e96cbd" />
+</div>
 ---
 
 ## 💡 What is FileSense?
@@ -127,3 +129,5 @@ FileSense breaks away from generic enterprise dashboards by implementing a tacti
 - **No Model Training**: Private documents and embeddings are strictly isolated and never used to train public AI models.
 - **Workspace Isolation**: Vector indices and storage vaults are partitioned by project and user ID, preventing cross-tenant leakage.
 - **Presigned Direct Uploads**: Files stream directly from the browser to encrypted Tigris storage vaults using temporary presigned URLs, eliminating server-side egress vulnerabilities.
+
+
