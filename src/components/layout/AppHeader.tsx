@@ -1,6 +1,16 @@
 import React from "react";
 import type { Project, ChatSession } from "../../types";
-import { PanelRight, Menu, Folder, ChevronRight, MessageSquare } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { PanelRight, Folder, MessageSquare } from "lucide-react";
 
 interface AppHeaderProps {
   projects: Project[];
@@ -9,7 +19,7 @@ interface AppHeaderProps {
   documentCount?: number;
   artifactsPanelOpen: boolean;
   onToggleArtifactsPanel: () => void;
-  onToggleSidebar: () => void;
+  onToggleSidebar?: () => void;
   onSelectProject?: (projectId: string) => void;
   onOpenNewProjectModal?: () => void;
 }
@@ -19,78 +29,65 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   activeSession,
   artifactsPanelOpen,
   onToggleArtifactsPanel,
-  onToggleSidebar,
 }) => {
   return (
-    <header className="h-12 w-full bg-[#FAF9F6]/40 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between px-4 font-sans select-none transition-colors">
-      {/* Left: Mobile Menu Toggle + Clean Breadcrumb Navigation */}
-      <div className="flex items-center gap-2.5 min-w-0">
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          aria-label="Toggle navigation sidebar"
-          className="lg:hidden shrink-0 size-8 flex items-center justify-center rounded-full text-[#16161399] hover:bg-[#1616130a] hover:text-[#161613] transition-colors cursor-pointer"
-        >
-          <Menu className="size-4" />
-        </button>
+    <header className="h-12 w-full bg-background border-b border-border flex items-center justify-between px-3 shrink-0">
+      {/* Left: Sidebar Trigger & Breadcrumbs */}
+      <div className="flex items-center gap-2 min-w-0">
+        <SidebarTrigger className="-ml-1" />
 
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0 text-xs font-sans">
-          {!activeProject ? (
-            <span className="text-[#16161366] font-normal truncate">
-              No project selected
-            </span>
-          ) : (
-            <>
-              {/* Project Crumb */}
-              <div className="flex items-center gap-1.5 text-[#16161380] shrink-0 font-normal">
-                <Folder className="size-3.5 text-[#7C5CFC]/80" />
-                <span
-                  className="truncate max-w-[120px] sm:max-w-[180px]"
-                  title={activeProject.title}
-                >
-                  {activeProject.title}
-                </span>
-              </div>
-
-              {/* Separator */}
-              <ChevronRight className="size-3 text-[#16161326] shrink-0" />
-
-              {/* Active Thread Crumb with Light Emphasis */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                {activeSession ? (
-                  <div className="flex items-center gap-1.5 min-w-0 px-2 py-0.5 rounded-md bg-[#16161306] border border-[#1616130a] text-[#161613] font-medium">
-                    <MessageSquare className="size-3 text-[#7C5CFC] shrink-0" />
-                    <span
-                      className="truncate max-w-[180px] sm:max-w-[360px]"
-                      title={activeSession.title}
-                    >
-                      {activeSession.title}
+        <Breadcrumb>
+          <BreadcrumbList>
+            {!activeProject ? (
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-xs text-muted-foreground">
+                  No project selected
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            ) : (
+              <>
+                <BreadcrumbItem>
+                  <BreadcrumbLink className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Folder className="size-3.5" />
+                    <span className="truncate max-w-[140px]" title={activeProject.title}>
+                      {activeProject.title}
                     </span>
-                  </div>
-                ) : (
-                  <span className="text-[#16161366] font-normal">New thread</span>
-                )}
-              </div>
-            </>
-          )}
-        </nav>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+
+                <BreadcrumbSeparator />
+
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                    {activeSession ? (
+                      <>
+                        <MessageSquare className="size-3.5 text-muted-foreground" />
+                        <span className="truncate max-w-[200px]" title={activeSession.title}>
+                          {activeSession.title}
+                        </span>
+                      </>
+                    ) : (
+                      "New Thread"
+                    )}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            )}
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
-      {/* Right: Files Side Panel Toggle with Tiimo pill button styling */}
-      <div className="flex items-center gap-2 shrink-0">
-        <button
-          type="button"
+      {/* Right: Files Drawer Toggle */}
+      <div className="flex items-center gap-2">
+        <Button
+          variant={artifactsPanelOpen ? "secondary" : "ghost"}
+          size="sm"
           onClick={onToggleArtifactsPanel}
-          title={artifactsPanelOpen ? "Close files panel" : "Open files panel"}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full transition-all cursor-pointer ${
-            artifactsPanelOpen
-              ? "bg-[#161613] text-white shadow-xs"
-              : "bg-white/80 hover:bg-white text-[#161613] border border-[#16161314] hover:border-[#16161328] shadow-2xs"
-          }`}
+          className="text-xs gap-1.5 h-8 px-2.5"
         >
           <PanelRight className="size-3.5" />
           <span>Files</span>
-        </button>
+        </Button>
       </div>
     </header>
   );

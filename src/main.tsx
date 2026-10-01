@@ -5,11 +5,15 @@ import { CLERK_PUBLISHABLE_KEY } from "./api/config";
 import "./index.css";
 import App from "./App.tsx";
 
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     {CLERK_PUBLISHABLE_KEY ? (
       <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
-        <App />
+        <TooltipProvider>
+          <App />
+        </TooltipProvider>
       </ClerkProvider>
     ) : (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] p-6 text-[#161613] font-sans">

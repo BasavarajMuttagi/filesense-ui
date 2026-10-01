@@ -3,12 +3,16 @@ import { useAuth } from "@clerk/clerk-react";
 import type { UploadProgress } from "@tigrisdata/storage/client";
 import { uploadFile, MAX_FILE_SIZE_BYTES } from "../../api/upload";
 import type { Project } from "../../types";
+import { Button } from "@/components/ui/button";
 import {
   Paperclip,
   ArrowUp,
   AlertCircle,
   CheckCircle2,
   Loader2,
+  Square,
+  FileText,
+  X,
 } from "lucide-react";
 
 interface ChatInputProps {
@@ -17,6 +21,7 @@ interface ChatInputProps {
   onDocumentUploaded?: () => void;
   onOpenNewProjectModal: () => void;
   loading: boolean;
+  onStop?: () => void;
   placeholder?: string;
 }
 
@@ -26,6 +31,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onDocumentUploaded,
   onOpenNewProjectModal,
   loading,
+  onStop,
   placeholder = "Ask anything about your project documents...",
 }) => {
   const { getToken } = useAuth();
@@ -44,7 +50,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 180)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
     }
   }, [text]);
 
@@ -100,18 +106,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       try {
         const token = await getToken();
         await uploadFile(
-          { projectId: activeProject.id, file, token },
-          (p) => {
-            setUploadProgress(p);
-          }
+          {
+            projectId: activeProject.id,
+            file,
+            token,
+          },
+          (p) => setUploadProgress(p)
         );
+
         successCount++;
-        // Notify parent immediately when each file finishes so it appears in the sidebar right away!
         onDocumentUploaded?.();
       } catch (err: unknown) {
-        console.error(`Failed to upload ${file.name}:`, err);
-        const errMessage = err instanceof Error ? err.message : "upload error";
-        failedFiles.push(`${file.name} (${errMessage})`);
+        const message = err instanceof Error ? err.message : "Upload failed";
+        failedFiles.push(`${file.name} (${message})`);
       }
     }
 
@@ -119,149 +126,175 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setUploadProgress(null);
     setUploadFileName(null);
 
-    if (successCount === total) {
-      setUploadSuccessName(total === 1 ? files[0].name : `${total} files`);
-      setTimeout(() => {
-        setUploadSuccessName(null);
-      }, 3000);
-    } else if (successCount > 0) {
-      setUploadSuccessName(`${successCount} of ${total} files`);
-      setErrorMessage(`Failed to upload: ${failedFiles.join(", ")}`);
-      setTimeout(() => {
-        setUploadSuccessName(null);
-      }, 4000);
-    } else {
-      setErrorMessage(`Failed to upload files: ${failedFiles.join(", ")}`);
+    if (successCount > 0) {
+      setUploadSuccessName(
+        total > 1
+          ? `Uploaded ${successCount} files — indexing in background...`
+          : "File uploaded — indexing in background..."
+      );
+      setTimeout(() => setUploadSuccessName(null), 4000);
+    }
+
+    if (failedFiles.length > 0) {
+      setErrorMessage(failedFiles.join(", "));
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
-  const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length > 0) handleFilesUpload(files);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const onDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const onDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files || []);
-    if (files.length > 0) handleFilesUpload(files);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFilesUpload(Array.from(e.dataTransfer.files));
+    }
   };
 
   return (
-    <div className="w-full flex flex-col gap-2 font-sans">
-      {/* Tiimo Soft Rounded Card Input */}
-      <div
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
-        className={`p-4 bg-white border rounded-3xl transition-all duration-150 shadow-xs ${
-          isDragging
-            ? "border-[#7C5CFC] ring-3 ring-[#7C5CFC]/20 bg-[#F5F2FF]/40"
-            : "border-[#16161314] hover:border-[#16161324] focus-within:border-[#161613] focus-within:ring-3 focus-within:ring-[#7C5CFC]/15"
-        }`}
-      >
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={onFileSelect}
-          accept=".pdf,.txt,.docx,.png,.jpg,.jpeg"
-        />
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragging(true);
+      }}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={handleDrop}
+      className="relative w-full max-w-3xl mx-auto px-4 pb-4 font-sans"
+    >
+      {/* Upload Progress Bar */}
+      {isUploading && uploadProgress && (
+        <div className="mb-2 p-2.5 bg-muted/60 border rounded-lg flex flex-col gap-1 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-foreground flex items-center gap-1.5">
+              <Loader2 className="size-3 animate-spin" />
+              Uploading {uploadFileName || "document"}...
+            </span>
+            <span className="font-mono text-muted-foreground">{uploadProgress.percentage}%</span>
+          </div>
+          <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-200"
+              style={{ width: `${uploadProgress.percentage}%` }}
+            />
+          </div>
+        </div>
+      )}
 
-        {/* Textarea */}
+      {/* Success Notification */}
+      {uploadSuccessName && (
+        <div className="mb-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="size-3.5 shrink-0 text-emerald-600" />
+            <span>{uploadSuccessName}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setUploadSuccessName(null)}
+            className="text-emerald-700/60 hover:text-emerald-700 cursor-pointer"
+          >
+            <X className="size-3" />
+          </button>
+        </div>
+      )}
+
+      {/* Error Notification */}
+      {errorMessage && (
+        <div className="mb-2 px-3 py-1.5 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <AlertCircle className="size-3.5 shrink-0 text-destructive" />
+            <span>{errorMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setErrorMessage(null)}
+            className="text-destructive/60 hover:text-destructive cursor-pointer"
+          >
+            <X className="size-3" />
+          </button>
+        </div>
+      )}
+
+      {/* Drag & Drop Overlay */}
+      {isDragging && (
+        <div className="absolute inset-x-4 inset-y-0 bg-accent/80 border-2 border-dashed border-primary rounded-xl flex items-center justify-center z-30 pointer-events-none">
+          <div className="flex items-center gap-2 text-xs font-medium text-foreground bg-background px-3 py-1.5 rounded-md border shadow-sm">
+            <FileText className="size-3.5" />
+            <span>Drop documents here</span>
+          </div>
+        </div>
+      )}
+
+      {/* Main Input Container */}
+      <div className="relative flex flex-col bg-background border border-input rounded-xl focus-within:ring-1 focus-within:ring-ring transition-colors">
         <textarea
           ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
+          placeholder={
+            !activeProject
+              ? "Select or create a project to start chatting..."
+              : placeholder
+          }
           rows={1}
-          placeholder={placeholder}
-          aria-label="Ask a question"
-          className="w-full resize-none bg-transparent text-sm text-[#161613] placeholder:text-[#16161366] focus:outline-none leading-relaxed min-h-[44px]"
+          disabled={isUploading}
+          className="w-full bg-transparent px-3.5 pt-3 pb-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none min-h-[40px] max-h-[160px] leading-relaxed"
         />
 
-        {/* Bottom Action Bar */}
-        <div className="flex items-center justify-between pt-1">
-          {/* Left: Attach Document Button */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (!activeProject) {
-                  onOpenNewProjectModal();
-                } else {
-                  fileInputRef.current?.click();
+        {/* Action Controls Toolbar */}
+        <div className="flex items-center justify-between px-2.5 pb-2.5 pt-0.5">
+          <div className="flex items-center gap-1.5">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.txt,.md,.docx,.csv,.json,.ts,.tsx,.py"
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  handleFilesUpload(Array.from(e.target.files));
                 }
               }}
+              className="hidden"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
               disabled={isUploading}
-              aria-label="Attach file"
-              title="Attach document to project (max 25MB)"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#16161399] hover:text-[#161613] hover:bg-[#16161308] rounded-full transition-colors cursor-pointer disabled:opacity-50"
+              onClick={() => fileInputRef.current?.click()}
+              title="Attach documents"
+              className="text-muted-foreground hover:text-foreground"
             >
               <Paperclip className="size-3.5" />
-              <span>Attach</span>
-            </button>
+            </Button>
           </div>
 
-          {/* Right: Send Message Button - Tiimo obsidian circle button */}
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={!text.trim() || loading || isUploading}
-            aria-label="Send message"
-            className="size-8.5 rounded-full bg-[#161613] hover:bg-[#282824] disabled:bg-[#16161312] disabled:text-[#16161340] text-white flex items-center justify-center transition-all cursor-pointer shadow-xs disabled:cursor-not-allowed active:scale-95 hover:scale-[1.03]"
-          >
-            {loading || isUploading ? (
-              <Loader2 className="size-4 animate-spin text-[#161613]" />
+          <div className="flex items-center gap-1.5">
+            {loading ? (
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon-xs"
+                onClick={onStop}
+                title="Stop generation"
+              >
+                <Square className="size-3 fill-current" />
+              </Button>
             ) : (
-              <ArrowUp className="size-4 stroke-[2.5]" />
+              <Button
+                type="button"
+                size="icon-xs"
+                disabled={!text.trim() || isUploading}
+                onClick={handleSend}
+                title="Send message"
+              >
+                <ArrowUp className="size-3.5" />
+              </Button>
             )}
-          </button>
+          </div>
         </div>
-
-        {/* Upload Progress Banner (ONLY while actively uploading) */}
-        {isUploading && (
-          <div className="mt-2 flex items-center justify-between text-xs text-[#161613b3] bg-[#FAF9F6] px-3 py-2 rounded-2xl">
-            <div className="flex items-center gap-2 min-w-0">
-              <Loader2 className="size-3.5 animate-spin text-[#7C5CFC]" />
-              <span className="truncate">Uploading {uploadFileName || "file"}...</span>
-            </div>
-            {uploadProgress && (
-              <span className="font-mono text-[#7C5CFC] font-semibold bg-[#E2DAFF]/60 px-2 py-0.5 rounded-full text-[11px] shrink-0">
-                {uploadProgress.percentage}%
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Upload Success indicator (ONLY after upload finishes, never stacked) */}
-        {!isUploading && uploadSuccessName && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700 font-medium bg-[#E8F8ED] px-3 py-2 rounded-2xl animate-in fade-in duration-150">
-            <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-            <span className="truncate">Uploaded {uploadSuccessName}</span>
-          </div>
-        )}
       </div>
-
-      {/* Error notification */}
-      {errorMessage && (
-        <div className="p-3 bg-[#FFF0ED] border border-[#FFD3C4] rounded-2xl text-[#C53030] flex items-center gap-2 text-xs">
-          <AlertCircle className="size-4 shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
     </div>
   );
 };

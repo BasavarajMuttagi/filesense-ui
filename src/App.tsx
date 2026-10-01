@@ -6,6 +6,7 @@ import { getDocumentsByProject, deleteDocument } from "./api/documents";
 import { listQueries, listSessions } from "./api/queries";
 import type { Project, DocumentItem, QueryRecord, ChatSession } from "./types";
 
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/layout/AppSidebar";
 import { AppHeader } from "./components/layout/AppHeader";
 import { ChatView } from "./components/chat/ChatView";
@@ -27,7 +28,6 @@ export function App() {
   const [queries, setQueries] = useState<QueryRecord[]>([]);
 
   // UI Layout States
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [artifactsPanelOpen, setArtifactsPanelOpen] = useState(true);
   const [inspectingDocument, setInspectingDocument] = useState<DocumentItem | null>(null);
 
@@ -280,32 +280,30 @@ export function App() {
   // 1. Loading screen while Clerk authentication initializes
   if (!isLoaded) {
     return (
-      <div className="min-h-screen w-screen bg-[#FAF9F6] flex flex-col items-center justify-center font-sans select-none">
-        <div className="size-12 rounded-2xl bg-[#E2DAFF] text-[#7C5CFC] flex items-center justify-center shadow-xs mb-3 animate-pulse">
-          <Layers className="size-6" />
+      <div className="min-h-screen w-screen bg-background flex flex-col items-center justify-center font-sans select-none">
+        <div className="size-10 rounded-xl bg-muted text-foreground flex items-center justify-center mb-3 animate-pulse">
+          <Layers className="size-5" />
         </div>
-        <span className="text-xs font-medium text-[#16161380]">Initializing FileSense...</span>
+        <span className="text-xs text-muted-foreground">Initializing FileSense...</span>
       </div>
     );
   }
 
-  // 2. Unauthenticated state: Render the Tiimo-inspired Landing Page
+  // 2. Unauthenticated state: Render the Landing Page
   if (!isSignedIn) {
     return <LandingPage />;
   }
 
   return (
-    <div className="flex h-screen w-screen bg-[#FAF9F6] text-[#161613] overflow-hidden font-sans selection:bg-[#E2DAFF] selection:text-[#161613]">
+    <SidebarProvider className="h-screen w-full overflow-hidden">
       {/* 1. Left Column: App Sidebar Navigation */}
       <AppSidebar
         projects={projects}
         activeProject={activeProject}
         sessions={sessions}
         activeSessionId={activeSessionId}
-        collapsed={sidebarCollapsed}
         loadingProjects={loadingProjects}
         loadingSessions={loadingSessions}
-        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         onSelectProject={(id) => setSelectedProjectId(id)}
         onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
         onDeleteProject={handleDeleteProject}
@@ -314,7 +312,7 @@ export function App() {
       />
 
       {/* 2. Middle Column: Main Header & Central RAG Stream Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      <SidebarInset className="flex flex-col h-screen overflow-hidden">
         <AppHeader
           projects={projects}
           activeProject={activeProject}
@@ -322,7 +320,6 @@ export function App() {
           documentCount={documents.length}
           artifactsPanelOpen={artifactsPanelOpen}
           onToggleArtifactsPanel={() => setArtifactsPanelOpen(!artifactsPanelOpen)}
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
           onSelectProject={(id) => setSelectedProjectId(id)}
           onOpenNewProjectModal={() => setNewProjectModalOpen(true)}
         />
@@ -345,7 +342,7 @@ export function App() {
             loadingHistory={loadingQueries}
           />
         </main>
-      </div>
+      </SidebarInset>
 
       {/* 3. Right Column: Artifacts & Documents Side Panel */}
       <ArtifactsPanel
@@ -371,7 +368,7 @@ export function App() {
         onClose={() => setInspectingDocument(null)}
         onDeleteDocument={handleDeleteDocument}
       />
-    </div>
+    </SidebarProvider>
   );
 }
 
