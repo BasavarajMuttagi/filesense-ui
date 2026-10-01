@@ -1,100 +1,160 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render } from "vitest-browser-react";
 import { ArtifactsPanel } from "./ArtifactsPanel";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import type { DocumentItem, Project } from "../../types";
+import type { Project, DocumentItem } from "../../types";
 
 const mockProject: Project = {
   id: "proj-1",
   title: "Test Project",
-  description: null,
-  createdAt: "2026-01-01T00:00:00Z",
-  updatedAt: "2026-01-01T00:00:00Z",
+  description: "A test project",
+  createdAt: Date.now(),
 };
 
-const mockDocs: DocumentItem[] = [
+const mockDocuments: DocumentItem[] = [
   {
     id: "doc-1",
     projectId: "proj-1",
-    fileName: "system_architecture.pdf",
+    fileName: "document-one.pdf",
     mimeType: "application/pdf",
-    fileSize: 1048576,
+    fileSize: 1024,
     status: "processed",
-    createdAt: "2026-01-01T00:00:00Z",
+    createdAt: Date.now(),
   },
   {
     id: "doc-2",
     projectId: "proj-1",
-    fileName: "migration_guide.docx",
-    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    fileSize: 512000,
+    fileName: "document-two.txt",
+    mimeType: "text/plain",
+    fileSize: 2048,
     status: "processing",
-    createdAt: "2026-01-02T00:00:00Z",
+    createdAt: Date.now(),
   },
 ];
 
-describe("ArtifactsPanel component", () => {
-  it("renders empty state message when no documents are attached", () => {
-    render(
-      <SidebarProvider>
-        <ArtifactsPanel
-          activeProject={mockProject}
-          documents={[]}
-          isOpen={true}
-          onClose={vi.fn()}
-          onDeleteDocument={vi.fn()}
-          onInspectDocument={vi.fn()}
-          onOpenNewProjectModal={vi.fn()}
-        />
-      </SidebarProvider>
-    );
+const renderPanel = (props: any) => {
+  return render(
+    <SidebarProvider>
+      <ArtifactsPanel {...props} />
+    </SidebarProvider>
+  );
+};
 
-    expect(screen.getByText("No documents attached")).toBeInTheDocument();
+describe("ArtifactsPanel", () => {
+  it("renders empty state", async () => {
+    const screen = await renderPanel({
+      activeProject: mockProject,
+      documents: [],
+      isOpen: true,
+      onClose: vi.fn(),
+      onDeleteDocument: vi.fn(),
+      onInspectDocument: vi.fn(),
+      onOpenNewProjectModal: vi.fn(),
+    });
+    
+    await expect.element(screen.getByText("No documents attached")).toBeVisible();
   });
 
-  it("renders uploaded files with correct filenames and status badges", () => {
-    render(
-      <SidebarProvider>
-        <ArtifactsPanel
-          activeProject={mockProject}
-          documents={mockDocs}
-          isOpen={true}
-          onClose={vi.fn()}
-          onDeleteDocument={vi.fn()}
-          onInspectDocument={vi.fn()}
-          onOpenNewProjectModal={vi.fn()}
-        />
-      </SidebarProvider>
-    );
-
-    expect(screen.getByText("system_architecture.pdf")).toBeInTheDocument();
-    expect(screen.getByText("migration_guide.docx")).toBeInTheDocument();
-    expect(screen.getByText("Ready")).toBeInTheDocument();
-    expect(screen.getByText("Indexing")).toBeInTheDocument();
+  it("renders documents with filenames and status badges", async () => {
+    const screen = await renderPanel({
+      activeProject: mockProject,
+      documents: mockDocuments,
+      isOpen: true,
+      onClose: vi.fn(),
+      onDeleteDocument: vi.fn(),
+      onInspectDocument: vi.fn(),
+      onOpenNewProjectModal: vi.fn(),
+    });
+    
+    await expect.element(screen.getByText("document-one.pdf")).toBeVisible();
+    await expect.element(screen.getByText("document-two.txt")).toBeVisible();
+    await expect.element(screen.getByText("Ready")).toBeVisible();
+    await expect.element(screen.getByText("Indexing")).toBeVisible();
+    
+    await expect(screen.getByRole("complementary")).toMatchScreenshot("artifacts-panel-with-docs");
   });
 
-  it("calls onClose when clicking the close button", async () => {
-    const user = userEvent.setup();
-    const handleClose = vi.fn();
+  it("Close button calls onClose", async () => {
+    const onClose = vi.fn();
+    const screen = await renderPanel({
+      activeProject: mockProject,
+      documents: [],
+      isOpen: true,
+      onClose,
+      onDeleteDocument: vi.fn(),
+      onInspectDocument: vi.fn(),
+      onOpenNewProjectModal: vi.fn(),
+    });
+    
+    await screen.getByRole("button", { name: /close files panel/i }).click();
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 
-    render(
-      <SidebarProvider>
-        <ArtifactsPanel
-          activeProject={mockProject}
-          documents={mockDocs}
-          isOpen={true}
-          onClose={handleClose}
-          onDeleteDocument={vi.fn()}
-          onInspectDocument={vi.fn()}
-          onOpenNewProjectModal={vi.fn()}
-        />
-      </SidebarProvider>
-    );
+  it("Loading state shows skeletons", async () => {
+    const screen = await renderPanel({
+      activeProject: mockProject,
+      documents: mockDocuments,
+      isOpen: true,
+      loading: true,
+      onClose: vi.fn(),
+      onDeleteDocument: vi.fn(),
+      onInspectDocument: vi.fn(),
+      onOpenNewProjectModal: vi.fn(),
+    });
+    
+    await expect.element(screen.getByText("No documents attached")).not.toBeInTheDocument();
+    await expect.element(screen.getByText("document-one.pdf")).not.toBeInTheDocument();
+  });
 
-    const closeBtn = screen.getByRole("button", { name: /close files panel/i });
-    await user.click(closeBtn);
+  it("No active project shows create project prompt", async () => {
+    const onOpenNewProjectModal = vi.fn();
+    const screen = await renderPanel({
+      activeProject: null,
+      documents: [],
+      isOpen: true,
+      onClose: vi.fn(),
+      onDeleteDocument: vi.fn(),
+      onInspectDocument: vi.fn(),
+      onOpenNewProjectModal,
+    });
+    
+    await expect.element(screen.getByText("No project active")).toBeVisible();
+    await screen.getByRole("button", { name: /create project/i }).click();
+    expect(onOpenNewProjectModal).toHaveBeenCalledTimes(1);
+  });
 
-    expect(handleClose).toHaveBeenCalledTimes(1);
+  it("Document click calls onInspectDocument", async () => {
+    const onInspectDocument = vi.fn();
+    const screen = await renderPanel({
+      activeProject: mockProject,
+      documents: mockDocuments,
+      isOpen: true,
+      onClose: vi.fn(),
+      onDeleteDocument: vi.fn(),
+      onInspectDocument,
+      onOpenNewProjectModal: vi.fn(),
+    });
+    
+    await screen.getByText("document-one.pdf").click();
+    expect(onInspectDocument).toHaveBeenCalledWith(mockDocuments[0]);
+  });
+
+  it("Error status badge renders", async () => {
+    const errorDoc: DocumentItem = {
+      ...mockDocuments[0],
+      id: "doc-error",
+      status: "error",
+    };
+    const screen = await renderPanel({
+      activeProject: mockProject,
+      documents: [errorDoc],
+      isOpen: true,
+      onClose: vi.fn(),
+      onDeleteDocument: vi.fn(),
+      onInspectDocument: vi.fn(),
+      onOpenNewProjectModal: vi.fn(),
+    });
+    
+    await expect.element(screen.getByText("Error")).toBeVisible();
   });
 });

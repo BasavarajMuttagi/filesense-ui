@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 .env
+
+# Screenshots & Test artifacts
+/screenshots/
+__screenshots__/
+.vitest/

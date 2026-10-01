@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render } from "vitest-browser-react";
 import { AppHeader } from "./AppHeader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Project, ChatSession } from "../../types";
@@ -23,8 +22,8 @@ const mockSession: ChatSession = {
 };
 
 describe("AppHeader component", () => {
-  it("renders 'No project selected' when activeProject is null", () => {
-    render(
+  it("renders 'No project selected' when activeProject is null and verifies appearance", async () => {
+    const screen = await render(
       <SidebarProvider>
         <AppHeader
           projects={[]}
@@ -36,11 +35,15 @@ describe("AppHeader component", () => {
       </SidebarProvider>
     );
 
-    expect(screen.getByText("No project selected")).toBeInTheDocument();
+    // Functional assertions (checked in both unit and visual runs)
+    await expect.element(screen.getByText("No project selected")).toBeVisible();
+
+    // Visual screenshot assertion (bypassed in test:unit, verified in test:visual)
+    await expect(screen.getByRole("banner")).toMatchScreenshot("app-header-no-project");
   });
 
-  it("renders project title and session breadcrumb when active", () => {
-    render(
+  it("renders project title and session breadcrumb when active and matches snapshot", async () => {
+    const screen = await render(
       <SidebarProvider>
         <AppHeader
           projects={[mockProject]}
@@ -52,15 +55,16 @@ describe("AppHeader component", () => {
       </SidebarProvider>
     );
 
-    expect(screen.getByText("Engineering Knowledge Base")).toBeInTheDocument();
-    expect(screen.getByText("Architecture Discussion")).toBeInTheDocument();
+    await expect.element(screen.getByText("Engineering Knowledge Base")).toBeVisible();
+    await expect.element(screen.getByText("Architecture Discussion")).toBeVisible();
+
+    await expect(screen.getByRole("banner")).toMatchScreenshot("app-header-active-project");
   });
 
   it("calls onToggleArtifactsPanel when clicking the files toggle button", async () => {
-    const user = userEvent.setup();
     const handleToggle = vi.fn();
 
-    render(
+    const screen = await render(
       <SidebarProvider>
         <AppHeader
           projects={[mockProject]}
@@ -73,9 +77,26 @@ describe("AppHeader component", () => {
     );
 
     const toggleButton = screen.getByRole("button", { name: /files/i });
-    expect(toggleButton).toBeInTheDocument();
+    await expect.element(toggleButton).toBeVisible();
 
-    await user.click(toggleButton);
+    await toggleButton.click();
     expect(handleToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows 'New Thread' when project is active but no session", async () => {
+    const screen = await render(
+      <SidebarProvider>
+        <AppHeader
+          projects={[mockProject]}
+          activeProject={mockProject}
+          activeSession={null}
+          artifactsPanelOpen={true}
+          onToggleArtifactsPanel={vi.fn()}
+        />
+      </SidebarProvider>
+    );
+
+    await expect.element(screen.getByText("Engineering Knowledge Base")).toBeVisible();
+    await expect.element(screen.getByText("New Thread")).toBeVisible();
   });
 });
