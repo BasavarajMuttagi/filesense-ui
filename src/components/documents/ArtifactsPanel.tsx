@@ -9,6 +9,7 @@ import {
   FileSpreadsheet,
   Image as ImageIcon,
   CheckCircle2,
+  AlertCircle,
   Eye,
   FolderOpen,
   Loader2,
@@ -200,6 +201,11 @@ export const ArtifactsPanel: React.FC<ArtifactsPanelProps> = ({
                   <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF0B3] text-[#B88700] text-[10px] font-mono font-semibold">
                     <Loader2 className="size-2.5 animate-spin" />
                     <span>Indexing</span>
+                  </span>
+                ) : doc.status === "error" ? (
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FFF0ED] text-[#C53030] text-[10px] font-mono font-semibold" title="Indexing failed">
+                    <AlertCircle className="size-2.5" />
+                    <span>Failed</span>
                   </span>
                 ) : (
                   <CheckCircle2 className="size-4 text-[#136C40] shrink-0 group-hover:hidden" />

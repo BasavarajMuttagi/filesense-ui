@@ -2,9 +2,16 @@ import { z } from "zod";
 import { uploadToSignedUrl, type UploadProgress, type UploadResponse } from "@tigrisdata/storage/client";
 import { getApiBaseUrl, getDevToken } from "./config";
 
+export const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
+
 export const uploadSchema = z.object({
   projectId: z.string().min(1, "Project ID is required"),
-  file: z.instanceof(File, { message: "Valid file is required" }),
+  file: z
+    .instanceof(File, { message: "Valid file is required" })
+    .refine(
+      (file) => file.size <= MAX_FILE_SIZE_BYTES,
+      "File size exceeds 25MB limit",
+    ),
   token: z.string().nullable().optional(),
 });
 
@@ -37,14 +44,18 @@ export async function uploadFile(
       projectId,
       name: file.name,
       action: "singlepart-init",
-      operation: "put",
       contentType: file.type || "application/octet-stream",
+      fileSize: file.size,
     }),
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.error || `Upload authorization failed with status ${response.status}`);
+    let errorMessage = `Upload authorization failed with status ${response.status}`;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData?.message || errorData?.error || errorMessage;
+    } catch {}
+    throw new Error(errorMessage);
   }
 
   const rawJson = await response.json();

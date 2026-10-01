@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import type { UploadProgress } from "@tigrisdata/storage/client";
-import { uploadFile } from "../../api/upload";
+import { uploadFile, MAX_FILE_SIZE_BYTES } from "../../api/upload";
 import type { Project } from "../../types";
 import {
   Paperclip,
@@ -84,6 +84,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const file = files[i];
       const fileIndex = i + 1;
 
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        failedFiles.push(`${file.name} (exceeds 25MB limit)`);
+        continue;
+      }
+
       if (total > 1) {
         setUploadFileName(`${file.name} (${fileIndex}/${total})`);
       } else {
@@ -105,7 +110,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         onDocumentUploaded?.();
       } catch (err: unknown) {
         console.error(`Failed to upload ${file.name}:`, err);
-        failedFiles.push(file.name);
+        const errMessage = err instanceof Error ? err.message : "upload error";
+        failedFiles.push(`${file.name} (${errMessage})`);
       }
     }
 
@@ -201,7 +207,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               }}
               disabled={isUploading}
               aria-label="Attach file"
-              title="Attach document to project"
+              title="Attach document to project (max 25MB)"
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#16161399] hover:text-[#161613] hover:bg-[#16161308] rounded-full transition-colors cursor-pointer disabled:opacity-50"
             >
               <Paperclip className="size-3.5" />
